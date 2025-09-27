@@ -1,0 +1,137 @@
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_seq MATRIX_SIZE=5
+./matrix_multiply_seq 5 4
+=== SEQUENTIAL MODE ===
+Repetitions: 10
+Matrix size: 5x5
+Execution  1: 0.001000 ms
+Execution  2: 0.000000 ms
+Execution  3: 0.000000 ms
+Execution  4: 0.000000 ms
+Execution  5: 0.000000 ms
+Execution  6: 0.000000 ms
+Execution  7: 0.000000 ms
+Execution  8: 0.000000 ms
+Execution  9: 0.000000 ms
+Execution 10: 0.001000 ms
+
+=== STATISTICS ===
+Average time: 0.000200 ms
+Minimum time: 0.000000 ms
+Maximum time: 0.001000 ms
+Variation: ±0.000500 ms
+Speedup (min/max): infx
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_seq MATRIX_SIZE=10
+./matrix_multiply_seq 10 4
+=== SEQUENTIAL MODE ===
+Repetitions: 10
+Matrix size: 10x10
+Execution  1: 0.002000 ms
+Execution  2: 0.002000 ms
+Execution  3: 0.001000 ms
+Execution  4: 0.002000 ms
+Execution  5: 0.001000 ms
+Execution  6: 0.001000 ms
+Execution  7: 0.002000 ms
+Execution  8: 0.002000 ms
+Execution  9: 0.001000 ms
+Execution 10: 0.002000 ms
+
+=== STATISTICS ===
+Average time: 0.001600 ms
+Minimum time: 0.001000 ms
+Maximum time: 0.002000 ms
+Variation: ±0.000500 ms
+Speedup (min/max): 2.00x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_seq MATRIX_SIZE=50
+./matrix_multiply_seq 50 4
+=== SEQUENTIAL MODE ===
+Repetitions: 10
+Matrix size: 50x50
+Execution  1: 0.299000 ms
+Execution  2: 0.297000 ms
+Execution  3: 0.273000 ms
+Execution  4: 0.303000 ms
+Execution  5: 0.338000 ms
+Execution  6: 0.280000 ms
+Execution  7: 0.296000 ms
+Execution  8: 0.330000 ms
+Execution  9: 0.358000 ms
+Execution 10: 0.408000 ms
+
+=== STATISTICS ===
+Average time: 0.318200 ms
+Minimum time: 0.273000 ms
+Maximum time: 0.408000 ms
+Variation: ±0.067500 ms
+Speedup (min/max): 1.49x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_seq MATRIX_SIZE=100
+./matrix_multiply_seq 100 4
+=== SEQUENTIAL MODE ===
+Repetitions: 10
+Matrix size: 100x100
+Execution  1: 1.960000 ms
+Execution  2: 1.479000 ms
+Execution  3: 1.563000 ms
+Execution  4: 1.507000 ms
+Execution  5: 1.467000 ms
+Execution  6: 1.539000 ms
+Execution  7: 1.432000 ms
+Execution  8: 2.174000 ms
+Execution  9: 1.505000 ms
+Execution 10: 1.545000 ms
+
+=== STATISTICS ===
+Average time: 1.617100 ms
+Minimum time: 1.432000 ms
+Maximum time: 2.174000 ms
+Variation: ±0.371000 ms
+Speedup (min/max): 1.52x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_seq MATRIX_SIZE=1000
+./matrix_multiply_seq 1000 4
+=== SEQUENTIAL MODE ===
+Repetitions: 10
+Matrix size: 1000x1000
+Execution  1: 23718.655000 ms
+Execution  2: 23243.864000 ms
+Execution  3: 20033.675000 ms
+Execution  4: 20074.792000 ms
+Execution  5: 19844.113000 ms
+Execution  6: 19893.945000 ms
+Execution  7: 21021.388000 ms
+Execution  8: 19504.667000 ms
+Execution  9: 21101.968000 ms
+Execution 10: 20168.959000 ms
+
+=== STATISTICS ===
+Average time: 20860.602600 ms
+Minimum time: 19504.667000 ms
+Maximum time: 23718.655000 ms
+Variation: ±2106.994000 ms
+Speedup (min/max): 1.22x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_seq MATRIX_SIZE=1500
+./matrix_multiply_seq 1500 4
+=== SEQUENTIAL MODE ===
+Repetitions: 10
+Matrix size: 1500x1500
+Execution  1: 78310.430000 ms
+Execution  2: 75915.523000 ms
+Execution  3: 77895.956000 ms
+Execution  4: 77036.942000 ms
+Execution  5: 75906.320000 ms
+Execution  6: 78125.784000 ms
+Execution  7: 76060.256000 ms
+Execution  8: 75433.629000 ms
+Execution  9: 80268.637000 ms
+Execution 10: 86662.567000 ms
+
+=== STATISTICS ===
+Average time: 78161.604400 ms
+Minimum time: 75433.629000 ms
+Maximum time: 86662.567000 ms
+Variation: ±5614.469000 ms
+Speedup (min/max): 1.15x

@@ -1,0 +1,149 @@
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_par MATRIX_SIZE=5 THREADS=7
+./matrix_multiply_par 5 7
+=== PARALLEL MODE (7 iThreads) ===
+Repetitions: 10
+Matrix size: 5x5
+Execution  1: 2.332128 ms
+Execution  2: 0.005442 ms
+Execution  3: 0.003499 ms
+Execution  4: 0.003402 ms
+Execution  5: 0.004860 ms
+Execution  6: 0.003790 ms
+Execution  7: 0.004957 ms
+Execution  8: 0.003401 ms
+Execution  9: 0.003304 ms
+Execution 10: 0.003304 ms
+Verifying result...
+✓ Result CORRECT! A × I = A
+
+=== STATISTICS ===
+Average time: 0.236809 ms
+Minimum time: 0.003304 ms
+Maximum time: 2.332128 ms
+Variation: ±1.164412 ms
+Speedup (min/max): 705.85x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_par MATRIX_SIZE=10 THREADS=7
+./matrix_multiply_par 10 7
+=== PARALLEL MODE (7 iThreads) ===
+Repetitions: 10
+Matrix size: 10x10
+Execution  1: 2.277731 ms
+Execution  2: 0.006945 ms
+Execution  3: 0.007331 ms
+Execution  4: 0.007427 ms
+Execution  5: 0.006848 ms
+Execution  6: 0.007234 ms
+Execution  7: 0.008102 ms
+Execution  8: 0.007041 ms
+Execution  9: 0.007330 ms
+Execution 10: 0.006945 ms
+Verifying result...
+✓ Result CORRECT! A × I = A
+
+=== STATISTICS ===
+Average time: 0.234293 ms
+Minimum time: 0.006848 ms
+Maximum time: 2.277731 ms
+Variation: ±1.135441 ms
+Speedup (min/max): 332.61x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_par MATRIX_SIZE=50 THREADS=7
+./matrix_multiply_par 50 7
+=== PARALLEL MODE (7 iThreads) ===
+Repetitions: 10
+Matrix size: 50x50
+Execution  1: 1.373529 ms
+Execution  2: 0.056663 ms
+Execution  3: 0.058773 ms
+Execution  4: 0.059635 ms
+Execution  5: 0.057238 ms
+Execution  6: 0.056855 ms
+Execution  7: 0.056759 ms
+Execution  8: 0.057334 ms
+Execution  9: 0.058581 ms
+Execution 10: 0.060306 ms
+Verifying result...
+✓ Result CORRECT! A × I = A
+
+=== STATISTICS ===
+Average time: 0.189567 ms
+Minimum time: 0.056663 ms
+Maximum time: 1.373529 ms
+Variation: ±0.658433 ms
+Speedup (min/max): 24.24x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_par MATRIX_SIZE=100 THREADS=7
+./matrix_multiply_par 100 7
+=== PARALLEL MODE (7 iThreads) ===
+Repetitions: 10
+Matrix size: 100x100
+Execution  1: 2.382222 ms
+Execution  2: 0.381854 ms
+Execution  3: 0.406462 ms
+Execution  4: 0.413700 ms
+Execution  5: 0.381564 ms
+Execution  6: 0.410901 ms
+Execution  7: 0.389092 ms
+Execution  8: 0.412348 ms
+Execution  9: 0.465810 ms
+Execution 10: 7.333684 ms
+Verifying result...
+✓ Result CORRECT! A × I = A
+
+=== STATISTICS ===
+Average time: 1.297764 ms
+Minimum time: 0.381564 ms
+Maximum time: 7.333684 ms
+Variation: ±3.476060 ms
+Speedup (min/max): 19.22x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_par MATRIX_SIZE=1000 THREADS=7
+./matrix_multiply_par 1000 7
+=== PARALLEL MODE (7 iThreads) ===
+Repetitions: 10
+Matrix size: 1000x1000
+Execution  1: 6902.317218 ms
+Execution  2: 6856.325709 ms
+Execution  3: 6895.234780 ms
+Execution  4: 6900.858695 ms
+Execution  5: 6928.638867 ms
+Execution  6: 6914.964212 ms
+Execution  7: 6886.536582 ms
+Execution  8: 6880.374951 ms
+Execution  9: 7397.276996 ms
+Execution 10: 7146.949673 ms
+Verifying result...
+✓ Result CORRECT! A × I = A
+
+=== STATISTICS ===
+Average time: 6970.947768 ms
+Minimum time: 6856.325709 ms
+Maximum time: 7397.276996 ms
+Variation: ±270.475644 ms
+Speedup (min/max): 1.08x
+
+lucas@DESKTOP-JRQDRUK:/mnt/c/Users/Lucas/Documents/openMP/openMP/part1$ make run_par MATRIX_SIZE=1500 THREADS=7
+./matrix_multiply_par 1500 7
+=== PARALLEL MODE (7 iThreads) ===
+Repetitions: 10
+Matrix size: 1500x1500
+Execution  1: 23659.979932 ms
+Execution  2: 23711.869264 ms
+Execution  3: 23699.920438 ms
+Execution  4: 23801.329815 ms
+Execution  5: 24054.474833 ms
+Execution  6: 23639.952565 ms
+Execution  7: 24083.364883 ms
+Execution  8: 23777.463111 ms
+Execution  9: 23868.472704 ms
+Execution 10: 24562.268550 ms
+Verifying result...
+✓ Result CORRECT! A × I = A
+
+=== STATISTICS ===
+Average time: 23885.909609 ms
+Minimum time: 23639.952565 ms
+Maximum time: 24562.268550 ms
+Variation: ±461.157992 ms
+Speedup (min/max): 1.04x
