@@ -105,8 +105,9 @@ int classify(double *results, int size_results)
     int final_class = 0;
     double final_score = *results;
     int i;
-
+#if PARALLEL
 #pragma omp simd reduction(max : final_score, final_class) if (PARALLEL)
+#endif
     for (i = 1; i < size_results; i++)
     {
 
@@ -326,7 +327,7 @@ int main(void)
     printf("Modo: %s\n", PARALLEL ? "PARALELO" : "SEQUENCIAL");
     printf("Threads disponíveis: %d\n", PARALLEL ? omp_get_max_threads() : 1);
 
-    // Medir tempo de processamento dos dados
+    // Medir tempo de processamento dos dados   
     start_time = omp_get_wtime();
     int correct_predictions = 0;
 
@@ -335,6 +336,7 @@ int main(void)
     // Diretiva OpenMP para controle paralelo/sequencial
 #if PARALLEL
     omp_set_num_threads(THREADS);
+    omp_set_dynamic(0);
 #pragma omp parallel for if (PARALLEL) schedule(dynamic, 10) reduction(+ : correct_predictions) private(result)
 #endif
     for (i = 0; i < 150; i++)
@@ -423,7 +425,9 @@ double _neuron_evaluate(neuron_t *neuron, double *data)
 
     int i;
     double result = 0;
+#if PARALLEL
 #pragma omp simd reduction(+ : result) if (PARALLEL)
+#endif
     for (i = 0; i < neuron->n_weights; i++)
     {
 
