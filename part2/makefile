@@ -1,98 +1,101 @@
-# Nome do compilador C
+# Compiler and flags
 CC = gcc
+CFLAGS = -O2 -Wall -std=c99 -g
+OMP_FLAG = -fopenmp
+# CORRIGIDO: Adicionada a biblioteca matemática para funções como exp()
+LDLIBS = -lm
 
-# --- Configurações de Compilação ---
-CFLAGS = -Wall -Wextra -std=c99 -fopenmp
+# Source Directories
+NN_DIR = NN
+RF_DIR = RF
+SVM_DIR = SVM
 
-# --- Flags de Linkagem ---
-# Adicionamos -lm para incluir a biblioteca matemática (para a função exp(), etc.)
-LDFLAGS = -lm -fopenmp
+# Target Executable Names
+TARGET_NN_SEQ = nn_seq
+TARGET_RF_SEQ = rf_seq
+TARGET_SVM_SEQ = svm_seq
 
-# Perfil de Otimização (padrão)
-ifeq ($(DEBUG), 1)
-	CFLAGS += -g -O0
-	BUILD_PROFILE = Depuração
+TARGET_NN_PAR = nn_par
+TARGET_RF_PAR = rf_par
+TARGET_SVM_PAR = svm_par
+
+# Default parameters
+THREADS ?= 4
+PARALLEL ?= 1
+
+# Default target
+all: $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVM_SEQ) $(TARGET_SVM_PAR)
+
+# --- Build Rules ---
+
+# Sequential Versions
+$(TARGET_NN_SEQ): $(NN_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+
+$(TARGET_RF_SEQ): $(RF_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+
+$(TARGET_SVM_SEQ): $(SVM_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+
+# Parallel Versions
+$(TARGET_NN_PAR): $(NN_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+
+$(TARGET_RF_PAR): $(RF_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+
+$(TARGET_SVM_PAR): $(SVM_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+
+
+# --- Run Rules ---
+
+run_nn:
+ifeq ($(PARALLEL), 0)
+	@$(MAKE) $(TARGET_NN_SEQ) > /dev/null
+	./$(TARGET_NN_SEQ)
 else
-	CFLAGS += -O3 -march=native
-	BUILD_PROFILE = Otimizado (Release)
+	@$(MAKE) $(TARGET_NN_PAR) > /dev/null
+	./$(TARGET_NN_PAR) $(THREADS)
 endif
 
-# Compilação Paralela com OpenMP
-ifeq ($(PARALLEL), 1)
-	CFLAGS += -DPARALLEL=1
-	PARALLEL_MODE = Paralelo (com OpenMP)
-	
-	# Configuração do número de threads
-	THREADS ?= 4  # Valor padrão: 4 threads
-	CFLAGS += -DTHREADS=$(THREADS)
-	THREADS_INFO = , Threads: $(THREADS)
+run_rf:
+ifeq ($(PARALLEL), 0)
+	@$(MAKE) $(TARGET_RF_SEQ) > /dev/null
+	./$(TARGET_RF_SEQ)
 else
-	CFLAGS += -DPARALLEL=0
-	PARALLEL_MODE = Sequencial (apenas timing com OpenMP)
-	THREADS_INFO = 
+	@$(MAKE) $(TARGET_RF_PAR) > /dev/null
+	./$(TARGET_RF_PAR) $(THREADS)
 endif
 
-# --- Estrutura do Projeto ---
-PROGRAMS = NN RF SVM
-TARGETS = $(foreach prog,$(PROGRAMS),$(prog)/$(prog))
+run_svm:
+ifeq ($(PARALLEL), 0)
+	@$(MAKE) $(TARGET_SVM_SEQ) > /dev/null
+	./$(TARGET_SVM_SEQ)
+else
+	@$(MAKE) $(TARGET_SVM_PAR) > /dev/null
+	./$(TARGET_SVM_PAR) $(THREADS)
+endif
 
-# --- Regras Principais ---
 
-# Regra 'all': compila todos os programas
-.PHONY: all
-all: $(TARGETS)
-	@echo "\n[INFO] Todos os programas foram compilados com sucesso."
-
-# Regra 'run': compila e executa todos os programas
-.PHONY: run
-run: $(TARGETS)
-	@echo "\n[INFO] Executando todos os programas..."
-	@for program in $(TARGETS); do \
-		echo "\n--- Executando $$program ---"; \
-		./$$program; \
-		echo "--- Fim da execução de $$program ---"; \
-	done
-
-# --- Regras de Atalho e Limpeza ---
-.PHONY: NN RF SVM clean run-NN run-RF run-SVM build-NN build-RF build-SVM
-
-# Regras de compilação individual
-build-NN: NN/NN
-build-RF: RF/RF
-build-SVM: SVM/SVM
-
-# Regras de execução individual
-run-NN: NN/NN
-	@echo "--- Executando NN (Modo: $(PARALLEL_MODE)$(THREADS_INFO)) ---"
-	OMP_NUM_THREADS=$(THREADS) ./NN/NN
-
-run-RF: RF/RF
-	@echo "--- Executando RF (Modo: $(PARALLEL_MODE)$(THREADS_INFO)) ---"
-	OMP_NUM_THREADS=$(THREADS) ./RF/RF
-
-run-SVM: SVM/SVM
-	@echo "--- Executando SVM (Modo: $(PARALLEL_MODE)$(THREADS_INFO)) ---"
-	OMP_NUM_THREADS=$(THREADS) ./SVM/SVM
-
-# Regras para compilar e executar um programa específico
-NN: build-NN run-NN
-RF: build-RF run-RF
-SVM: build-SVM run-SVM
+# --- Maintenance ---
 
 clean:
-	@echo "Limpando arquivos compilados..."
-	rm -f $(TARGETS)
+	rm -f $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVM_SEQ) $(TARGET_SVM_PAR) *.o
 
-# --- Regras de Compilação Explícitas ---
+help:
+	@echo "Available targets:"
+	@echo "  all        - Build all sequential and parallel versions"
+	@echo "  run_nn     - Run NN version. Default is parallel."
+	@echo "  run_rf     - Run RF version. Default is parallel."
+	@echo "  run_svm    - Run SVM version. Default is parallel."
+	@echo "  clean      - Remove compiled binaries"
+	@echo ""
+	@echo "How to run sequential version:"
+	@echo "  make run_nn PARALLEL=0"
+	@echo ""
+	@echo "Override defaults for parallel run:"
+	@echo "  make run_nn THREADS=8"
 
-NN/NN: NN/main.c
-	@echo "--- Compilando NN | Perfil: $(BUILD_PROFILE) | Modo: $(PARALLEL_MODE)$(THREADS_INFO) ---"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-RF/RF: RF/main.c
-	@echo "--- Compilando RF | Perfil: $(BUILD_PROFILE) | Modo: $(PARALLEL_MODE)$(THREADS_INFO) ---"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-SVM/SVM: SVM/main.c
-	@echo "--- Compilando SVM | Perfil: $(BUILD_PROFILE) | Modo: $(PARALLEL_MODE)$(THREADS_INFO) ---"
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+.PHONY: all run_nn run_rf run_svm clean help
