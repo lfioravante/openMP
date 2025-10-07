@@ -30,49 +30,49 @@ all: $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGE
 
 # Sequential Versions
 $(TARGET_NN_SEQ): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -DTHREADS=1 -o $@ $< $(LDLIBS)
 
 $(TARGET_RF_SEQ): $(RF_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -DTHREADS=1 -o $@ $< $(LDLIBS)
 
 $(TARGET_SVM_SEQ): $(SVM_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -DTHREADS=1 -o $@ $< $(LDLIBS)
 
 # Parallel Versions
 $(TARGET_NN_PAR): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DTHREADS=$(THREADS) -o $@ $< $(LDLIBS)
 
 $(TARGET_RF_PAR): $(RF_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DTHREADS=$(THREADS) -o $@ $< $(LDLIBS)
 
 $(TARGET_SVM_PAR): $(SVM_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DTHREADS=$(THREADS) -o $@ $< $(LDLIBS)
 
 
 # --- Run Rules ---
 
-run_nn:
+run_nn: clean
 ifeq ($(PARALLEL), 0)
 	@$(MAKE) $(TARGET_NN_SEQ) > /dev/null
-	./$(TARGET_NN_SEQ)
+	./$(TARGET_NN_SEQ) $(THREADS)
 else
 	@$(MAKE) $(TARGET_NN_PAR) > /dev/null
 	./$(TARGET_NN_PAR) $(THREADS)
 endif
 
-run_rf:
+run_rf: clean
 ifeq ($(PARALLEL), 0)
 	@$(MAKE) $(TARGET_RF_SEQ) > /dev/null
-	./$(TARGET_RF_SEQ)
+	./$(TARGET_RF_SEQ) $(THREADS)
 else
 	@$(MAKE) $(TARGET_RF_PAR) > /dev/null
 	./$(TARGET_RF_PAR) $(THREADS)
 endif
 
-run_svm:
+run_svm: clean
 ifeq ($(PARALLEL), 0)
 	@$(MAKE) $(TARGET_SVM_SEQ) > /dev/null
-	./$(TARGET_SVM_SEQ)
+	./$(TARGET_SVM_SEQ) $(THREADS)
 else
 	@$(MAKE) $(TARGET_SVM_PAR) > /dev/null
 	./$(TARGET_SVM_PAR) $(THREADS)
