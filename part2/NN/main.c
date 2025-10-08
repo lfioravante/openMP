@@ -332,6 +332,8 @@ int main(int argc, char *argv[])
         {147, 6.5, 3.0, 5.2, 2.0, 2.0},
         {148, 6.2, 3.4, 5.4, 2.3, 2.0},
         {149, 5.9, 3.0, 5.1, 1.8, 2.0}};
+    
+    int batch_size = 50;
 
 #if PARALLEL
     omp_set_num_threads(threads);
