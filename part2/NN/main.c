@@ -332,6 +332,8 @@ int main(int argc, char *argv[])
         {147, 6.5, 3.0, 5.2, 2.0, 2.0},
         {148, 6.2, 3.4, 5.4, 2.3, 2.0},
         {149, 5.9, 3.0, 5.1, 1.8, 2.0}};
+    
+    int batch_size = 50;
 
 #if PARALLEL
     omp_set_num_threads(threads);
@@ -345,8 +347,24 @@ int main(int argc, char *argv[])
         double *result;
         (void)result;
 #if PARALLEL
+<<<<<<< HEAD
         #pragma omp parallel for if (PARALLEL) schedule(dynamic) reduction(+ : correct_predictions) private(result)
 #endif
+=======
+        #pragma omp parallel for
+        for (int b = 0; b < 150; b += batch_size)
+        {
+            for (i = b; i < b + batch_size && i < 150; i++)
+            {
+                result = neural_net_run(neural_net, test_data[i] + 1, 4);
+
+                //printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+
+                free(result);
+            }
+        }
+#else
+>>>>>>> 23d0cb1 (update 2.0)
         for (i = 0; i < 150; i++)
         {
             result = neural_net_run(neural_net, test_data[i] + 1, 4);
@@ -355,6 +373,10 @@ int main(int argc, char *argv[])
 
             free(result);
         }
+<<<<<<< HEAD
+=======
+#endif
+>>>>>>> 23d0cb1 (update 2.0)
         double end_time = omp_get_wtime();
         double rep_time = end_time - start_time;
         total_processing_time += rep_time;
