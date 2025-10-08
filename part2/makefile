@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -O2 -Wall -std=c99 -g
+CFLAGS = -O3 -Wall -std=c99 -g
 OMP_FLAG = -fopenmp
 # CORRIGIDO: Adicionada a biblioteca matemática para funções como exp()
 LDLIBS = -lm
@@ -10,12 +10,12 @@ NN_DIR = NN
 RF_DIR = RF
 SVM_DIR = SVM
 
-TARGET_NN_SEQ = nn_seq.exe
-TARGET_NN_PAR = nn_par.exe
-TARGET_RF_SEQ = rf_seq.exe
-TARGET_RF_PAR = rf_par.exe
-TARGET_SVM_SEQ = svm_seq.exe
-TARGET_SVM_PAR = svm_par.exe
+TARGET_NN_SEQ = nn_seq
+TARGET_NN_PAR = nn_par
+TARGET_RF_SEQ = rf_seq
+TARGET_RF_PAR = rf_par
+TARGET_SVM_SEQ = svm_seq
+TARGET_SVM_PAR = svm_par
 
 # Default parameters
 PARALLEL ?= 0
@@ -23,10 +23,10 @@ PARALLEL ?= 0
 # --- Neural Network Build Rules ---
 
 $(TARGET_NN_SEQ): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) -DPARALLEL=0 -o $@ $< $(LDLIBS) $(OMP_FLAG)
 
 $(TARGET_NN_PAR): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) -DPARALLEL=1 -o $@ $< $(LDLIBS) $(OMP_FLAG)
 
 # --- Random Forest Build Rules ---
 

@@ -18,8 +18,6 @@ APP_ROOT?=$(WORKING_FOLDER)
 MULT?=
 DEF?=
 
-NUM_REPS ?= 100
-
 -include NN.makefile.include
 
 GNG_CC=g++
@@ -51,21 +49,14 @@ ifeq ($(TOOL_CHAIN),gcc)
 run_CFR: exe
 
 exe::
-	
+    
 ifeq ($(PARALLEL),1)
-	# Building parallel version
-	$(V) $(GNG_CC) $(CFLAGS) \
-		$(SRC) \
-		$(APPINCLUDE) $(VAR) -o par_app.exe
+	$(V) $(GNG_CC) $(CFLAGS) $(SRC) $(APPINCLUDE) $(VAR) -o par_app
 else
-	# Building sequential version  
-	$(V) $(GNG_CC) $(CFLAGS) \
-		$(SRC) \
-		$(APPINCLUDE) $(VAR) -o seq_app.exe
+	$(V) $(GNG_CC) $(CFLAGS) $(SRC) $(APPINCLUDE) $(VAR) -o seq_app
+endif
 
 endif
 
-# ---------------------------------------------------------------------------------------
-
 clean::
-	- rm -f *.$(CROSS).elf *.$(CROSS).o $(NN_DIR)/Source/*/*.o $(COREA_DIR)/Source/*.o $(DEVICE_DIR)/Source/*.o app_seq.exe app_par.exe
+	- rm -f *.$(CROSS).elf *.$(CROSS).o $(NN_DIR)/Source/*/*.o $(COREA_DIR)/Source/*.o $(DEVICE_DIR)/Source/*.o par_app.exe seq_app.exe
