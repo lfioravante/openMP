@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     start_time = omp_get_wtime();
     // conv1 img_buffer2 -> img_buffer1
     //------------Alterar--------------
-    printf("Convolution - Layer 1\n");
+    //printf("Convolution - Layer 1\n");
     arm_convolve_HWC_q7_RGB(img_buffer2,
                             CONV1_IM_DIM,
                             CONV1_IM_CH,
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
     // Layer 2: Pool1
     start_time = omp_get_wtime();
     // pool1 img_buffer1 -> img_buffer2
-    printf("Max Pooling - Layer 2\n");
+    //printf("Max Pooling - Layer 2\n");
     arm_maxpool_q7_HWC(img_buffer1,
                        CONV1_OUT_DIM,
                        CONV1_OUT_CH,
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
     start_time = omp_get_wtime();
     // conv2 img_buffer2 -> img_buffer1
     //------------Alterar--------------
-    printf("Convolution - Layer 3\n");
+    //printf("Convolution - Layer 3\n");
     arm_convolve_HWC_q7_fast(img_buffer2,
                              CONV2_IM_DIM,
                              CONV2_IM_CH,
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     // Layer 4: Pool2
     start_time = omp_get_wtime();
     // pool2 img_buffer1 -> img_buffer2
-    printf("Max Pooling - Layer 4\n");
+    //printf("Max Pooling - Layer 4\n");
     arm_maxpool_q7_HWC(img_buffer1,
                        CONV2_OUT_DIM,
                        CONV2_OUT_CH,
@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
     start_time = omp_get_wtime();
     // conv3 img_buffer2 -> img_buffer1
     //------------Alterar--------------
-    printf("Convolution - Layer 5\n");
+    //printf("Convolution - Layer 5\n");
     arm_convolve_HWC_q7_fast(img_buffer2,
                              CONV3_IM_DIM,
                              CONV3_IM_CH,
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
     // Layer 6: Pool3
     start_time = omp_get_wtime();
     // pool3 img_buffer-> img_buffer2
-    printf("Max Pooling - Layer 6\n");
+    //printf("Max Pooling - Layer 6\n");
     arm_maxpool_q7_HWC(img_buffer1,
                        CONV3_OUT_DIM,
                        CONV3_OUT_CH,
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
 
     // Layer 7: Fully-Connected
     start_time = omp_get_wtime();
-    printf("Fully-Connected - Layer 7\n");
+    //printf("Fully-Connected - Layer 7\n");
     arm_fully_connected_q7_opt(img_buffer2,
                                ip1_wt,
                                IP1_DIM,
