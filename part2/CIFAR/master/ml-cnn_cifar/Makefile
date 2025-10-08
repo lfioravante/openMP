@@ -18,6 +18,8 @@ APP_ROOT?=$(WORKING_FOLDER)
 MULT?=
 DEF?=
 
+NUM_REPS ?= 100
+
 -include NN.makefile.include
 
 GNG_CC=g++
@@ -29,14 +31,14 @@ EXEPP=$(patsubst %.cpp,%.o,$(SRCPP))
 CFLAGS += -O3 
 CFLAGS += -w -g 
 CFLAGS += -fopenmp
+VAR = -DPARALLEL=$(PARALLEL)
 #CFLAGS += -std=gnu99
 
-SRC+= \
-     $(wildcard *.c)
+SRC+= $(wildcard *.c)
 
-SRCPP+=$(wildcard *.cpp)
+SRCPP+= $(wildcard *.cpp)
 
-SRCOBJ := $(patsubst %.c,%.o,$(SRC))
+SRCOBJ:= $(patsubst %.c,%.o,$(SRC))
 
 #
 # ---------------------------------------------------------------------------------------
@@ -46,17 +48,24 @@ all: all_$(TOOL_CHAIN)
 # gcc
 ifeq ($(TOOL_CHAIN),gcc)
 
-all_gcc: clean exe
+run_CFR: exe
 
 exe::
-	# Building testcase
+	
+ifeq ($(PARALLEL),1)
+	# Building parallel version
 	$(V) $(GNG_CC) $(CFLAGS) \
 		$(SRC) \
-		$(APPINCLUDE) -o app.exe
+		$(APPINCLUDE) $(VAR) -o par_app.exe
+else
+	# Building sequential version  
+	$(V) $(GNG_CC) $(CFLAGS) \
+		$(SRC) \
+		$(APPINCLUDE) $(VAR) -o seq_app.exe
 
 endif
 
 # ---------------------------------------------------------------------------------------
 
 clean::
-	- rm -f *.$(CROSS).elf *.$(CROSS).o $(NN_DIR)/Source/*/*.o $(COREA_DIR)/Source/*.o $(DEVICE_DIR)/Source/*.o
+	- rm -f *.$(CROSS).elf *.$(CROSS).o $(NN_DIR)/Source/*/*.o $(COREA_DIR)/Source/*.o $(DEVICE_DIR)/Source/*.o app_seq.exe app_par.exe

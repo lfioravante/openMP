@@ -10,50 +10,76 @@ NN_DIR = NN
 RF_DIR = RF
 SVM_DIR = SVM
 
-
-TARGET_NN = nn.exe
-TARGET_RF = rf.exe
-TARGET_SVM = svm.exe
+TARGET_NN_SEQ = nn_seq.exe
+TARGET_NN_PAR = nn_par.exe
+TARGET_RF_SEQ = rf_seq.exe
+TARGET_RF_PAR = rf_par.exe
+TARGET_SVM_SEQ = svm_seq.exe
+TARGET_SVM_PAR = svm_par.exe
 
 # Default parameters
-THREADS ?= 4
-PARALLEL ?= 1
-NUM_REPS ?= 10
+PARALLEL ?= 0
 
-# Default target
-all: $(TARGET_NN) $(TARGET_RF)  $(TARGET_SVM)
+# --- Neural Network Build Rules ---
 
-# --- Build Rules ---
+$(TARGET_NN_SEQ): $(NN_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
 
-$(TARGET_NN): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=$(PARALLEL) -DTHREADS=$(THREADS) -DNUM_REPS=$(NUM_REPS) -o $@ $< $(LDLIBS)
+$(TARGET_NN_PAR): $(NN_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
 
-$(TARGET_RF): $(RF_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=$(PARALLEL) -DTHREADS=$(THREADS) -DNUM_REPS=$(NUM_REPS) -o $@ $< $(LDLIBS)
+# --- Random Forest Build Rules ---
 
-$(TARGET_SVM): $(SVM_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=$(PARALLEL) -DTHREADS=$(THREADS) -DNUM_REPS=$(NUM_REPS) -o $@ $< $(LDLIBS)
+$(TARGET_RF_SEQ): $(RF_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+
+$(TARGET_RF_PAR): $(RF_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+
+# --- SVM Build Rules ---
+
+$(TARGET_SVM_SEQ): $(SVM_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
+
+$(TARGET_SVM_PAR): $(SVM_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
+
+
+all_seq: $(TARGET_NN_SEQ) $(TARGET_RF_SEQ) $(TARGET_SVM_SEQ)
+
+all_par: $(TARGET_NN_PAR) $(TARGET_RF_PAR) $(TARGET_SVM_PAR)
+
+all_both: all_seq all_par
 
 
 # --- Run Rules ---
 
-run_nn: clean
-	@$(MAKE) $(TARGET_NN) > /dev/null
-	./$(TARGET_NN) $(THREADS)
+run_nn:
+ifeq ($(PARALLEL),1)
+	@$(MAKE) $(TARGET_NN_PAR)
+else
+	@$(MAKE) $(TARGET_NN_SEQ)
+endif
 
-run_rf: clean
-	@$(MAKE) $(TARGET_RF) > /dev/null
-	./$(TARGET_RF) $(THREADS)
+run_rf:
+ifeq ($(PARALLEL),1)
+	@$(MAKE) $(TARGET_RF_PAR)
+else
+	@$(MAKE) $(TARGET_RF_SEQ)
+endif
 
-run_svm: clean
-	@$(MAKE) $(TARGET_SVM) > /dev/null
-	./$(TARGET_SVM) $(THREADS)
+run_svm:
+ifeq ($(PARALLEL),1)
+	@$(MAKE) $(TARGET_SVM_PAR)
+else
+	@$(MAKE) $(TARGET_SVM_SEQ)
+endif
 
 
 # --- Maintenance ---
 
 clean:
-	rm -f $(TARGET_NN) $(TARGET_RF) $(TARGET_SVM) *.o
+	rm -f $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVM_SEQ) $(TARGET_SVM_PAR) *.o
 
 help:
 	@echo "Available targets:"

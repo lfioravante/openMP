@@ -101,12 +101,6 @@
 #define PARALLEL 0
 #endif
 
-#ifndef THREADS
-#define THREADS 1
-#endif
-
-#define NUM_REPETITIONS 10
-
 // include the input and weights
 
 static q7_t conv1_wt[CONV1_IM_CH * CONV1_KER_DIM * CONV1_KER_DIM * CONV1_OUT_CH] = CONV1_WT;
@@ -130,8 +124,18 @@ q7_t col_buffer[2 * 5 * 5 * 32 * 2];
 
 q7_t scratch_buffer[32 * 32 * 10 * 4];
 
-int main()
-{
+int main(int argc, char *argv[]) {
+    // Valores padrão
+    int threads = 4;
+    int num_reps = 100;
+    
+    // Ler argumentos da linha de comando
+    if (argc >= 2) {
+        threads = atoi(argv[1]);
+    }
+    if (argc >= 3) {
+        num_reps = atoi(argv[2]);
+    }
 
     printf("Startup\n");
     /* start the execution */
@@ -155,10 +159,10 @@ int main()
         img_buffer2[i + 2] = (q7_t)__SSAT(((((int)image_data[i + 2] - mean_data[2]) << 7) + (0x1 << (scale_data[2] - 1))) >> scale_data[2], 8);
     }
 #if PARALLEL
-    omp_set_num_threads(THREADS);
+    omp_set_num_threads(threads);
 #endif  
 
-    for(int i = 0; i < NUM_REPETITIONS; i++) {
+    for(int i = 0; i < num_reps; i++) {
     double repetition_start_time = omp_get_wtime();
 
     start_time = omp_get_wtime();
@@ -316,18 +320,18 @@ int main()
 
 // Calcular e imprimir tempos médios
 printf("---------------------------------------------------\n");
-printf("Average Execution Time Report (after %d runs)\n", NUM_REPETITIONS);
+printf("Average Execution Time Report (after %d runs)\n", num_reps);
 printf("---------------------------------------------------\n");
-printf("Layer 1 (Conv1 + ReLU): %.6f ms\n", (total_time_conv1 / NUM_REPETITIONS) * 1000);
-printf("Layer 2 (MaxPool1)    : %.6f ms\n", (total_time_pool1 / NUM_REPETITIONS) * 1000);
-printf("Layer 3 (Conv2 + ReLU): %.6f ms\n", (total_time_conv2 / NUM_REPETITIONS) * 1000);
-printf("Layer 4 (MaxPool2)    : %.6f ms\n", (total_time_pool2 / NUM_REPETITIONS) * 1000);
-printf("Layer 5 (Conv3 + ReLU): %.6f ms\n", (total_time_conv3 / NUM_REPETITIONS) * 1000);
-printf("Layer 6 (MaxPool3)    : %.6f ms\n", (total_time_pool3 / NUM_REPETITIONS) * 1000);
-printf("Layer 7 (FC)          : %.6f ms\n", (total_time_fc / NUM_REPETITIONS) * 1000);
-printf("Layer 8 (Softmax)     : %.6f ms\n", (total_time_softmax / NUM_REPETITIONS) * 1000);
+printf("Layer 1 (Conv1 + ReLU): %.6f ms\n", (total_time_conv1 / num_reps) * 1000);
+printf("Layer 2 (MaxPool1)    : %.6f ms\n", (total_time_pool1 / num_reps) * 1000);
+printf("Layer 3 (Conv2 + ReLU): %.6f ms\n", (total_time_conv2 / num_reps) * 1000);
+printf("Layer 4 (MaxPool2)    : %.6f ms\n", (total_time_pool2 / num_reps) * 1000);
+printf("Layer 5 (Conv3 + ReLU): %.6f ms\n", (total_time_conv3 / num_reps) * 1000);
+printf("Layer 6 (MaxPool3)    : %.6f ms\n", (total_time_pool3 / num_reps) * 1000);
+printf("Layer 7 (FC)          : %.6f ms\n", (total_time_fc / num_reps) * 1000);
+printf("Layer 8 (Softmax)     : %.6f ms\n", (total_time_softmax / num_reps) * 1000);
 printf("---------------------------------------------------\n");
-printf("Total Average Inference Time: %.6f ms\n", (total_inference_time / NUM_REPETITIONS) * 1000);
+printf("Total Average Inference Time: %.6f ms\n", (total_inference_time / num_reps) * 1000);
 printf("---------------------------------------------------\n\n");
 
 printf("Output classification:\n");

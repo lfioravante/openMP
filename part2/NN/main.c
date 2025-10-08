@@ -58,14 +58,6 @@
 #define PARALLEL 0
 #endif
 
-#ifndef THREADS
-#define THREADS 1
-#endif
-
-#ifndef NUM_REPS
-#define NUM_REPS 1
-#endif
-
 typedef struct linked_list linked_list_t;
 
 linked_list_t *new_linked_list();
@@ -127,8 +119,21 @@ int classify(double *results, int size_results)
 
 /* USER CODE END */
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    // Valores padrão
+    int threads = 4;
+    int num_reps = 100;
+
+    // Ler argumentos da linha de comando
+    if (argc >= 2)
+    {
+        threads = atoi(argv[1]);
+    }
+    if (argc >= 3)
+    {
+        num_reps = atoi(argv[2]);
+    }
 
     //
     int i;
@@ -329,15 +334,11 @@ int main(void)
         {149, 5.9, 3.0, 5.1, 1.8, 2.0}};
 
 #if PARALLEL
-    omp_set_num_threads(THREADS);
+    omp_set_num_threads(threads);
     omp_set_dynamic(0);
 #endif
 
-    printf("=== CONFIGURAÇÃO ===\n");
-    printf("Modo: %s\n", PARALLEL ? "PARALELO" : "SEQUENCIAL");
-    printf("Threads disponíveis: %d\n", PARALLEL ? omp_get_max_threads() : 1);
-
-    for (int j = 0; j < NUM_REPS; j++)
+    for (int j = 0; j < num_reps; j++)
     { // Medir tempo de processamento dos dados
         double start_time = omp_get_wtime();
         int correct_predictions = 0;
@@ -370,9 +371,12 @@ int main(void)
             max_time = rep_time;
     }
 
-    double avg_processing_time = total_processing_time / NUM_REPS;
+    double avg_processing_time = total_processing_time / num_reps;
 
-    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", NUM_REPS);
+    printf("=== CONFIGURAÇÃO ===\n");
+    printf("Modo: %s\n", PARALLEL ? "PARALELO" : "SEQUENCIAL");
+    printf("threads disponíveis: %d\n", PARALLEL ? omp_get_max_threads() : 1);
+    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", num_reps);
     printf("Tempo total de processamento: %.6f segundos\n", total_processing_time);
     printf("Tempo médio por repetição: %.6f segundos\n", avg_processing_time);
     printf("Tempo mínimo: %.6f segundos\n", min_time);

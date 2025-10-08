@@ -6,14 +6,6 @@
 #define PARALLEL 0
 #endif
 
-#ifndef THREADS
-#define THREADS 1
-#endif
-
-#ifndef NUM_REPS
-#define NUM_REPS 10
-#endif
-
 float set_vers_svs[16][2] = {
     {1.9, 0.2},
     {3.3, 1.0},
@@ -138,8 +130,18 @@ final_classes_t classify(float vals[])
     return final_class;
 }
 
-int main()
-{
+int main(int argc, char *argv[]) {
+    // Valores padrão
+    int threads = 4;
+    int num_reps = 100;
+    
+    // Ler argumentos da linha de comando
+    if (argc >= 2) {
+        threads = atoi(argv[1]);
+    }
+    if (argc >= 3) {
+        num_reps = atoi(argv[2]);
+    }
 
     float samples[150][2] = {
         {1.4, 0.2},
@@ -297,7 +299,7 @@ int main()
     unsigned num_samples = 150;
 #if PARALLEL
     // Configuração do número de threads
-    omp_set_num_threads(THREADS);
+    omp_set_num_threads(threads);
 #endif
 
     double total_execution_time = 0.0;
@@ -305,7 +307,7 @@ int main()
     double min_execution_time = __DBL_MAX__;
     double max_execution_time = 0.0;
 
-    for (int j = 0; j < NUM_REPS; j++)
+    for (int j = 0; j < num_reps; j++)
     {
         double start_time = omp_get_wtime();
 #if PARALLEL
@@ -343,15 +345,15 @@ int main()
             max_execution_time = rep_total_time;
     }
     // Calculate averages
-    double avg_execution_time = total_execution_time / NUM_REPS;
-    double avg_prediction_time = total_avg_prediction_time / NUM_REPS;
+    double avg_execution_time = total_execution_time / num_reps;
+    double avg_prediction_time = total_avg_prediction_time / num_reps;
 
     // Print final results
-    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", NUM_REPS);
+    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", num_reps);
 #if PARALLEL
     printf("------ PARALELO ------\n");
 #endif
-    printf("Threads disponíveis: %d, Utilizadas: %d\n", omp_get_max_threads(), THREADS);
+    printf("threads disponíveis: %d, Utilizadas: %d\n", omp_get_max_threads(), threads);
     printf("Tempo médio por predição: %.6f segundos\n", avg_prediction_time);
     printf("Tempo total médio de execução: %.6f segundos\n", avg_execution_time);
     printf("Tempo total mínimo: %.6f segundos\n", min_execution_time);

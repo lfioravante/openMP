@@ -29,14 +29,6 @@
 #define PARALLEL 0
 #endif
 
-#ifndef THREADS
-#define THREADS 1
-#endif
-
-#ifndef NUM_REPS
-#define NUM_REPS 1
-#endif
-
 //
 // node in decision tree
 //
@@ -351,8 +343,18 @@ float test_data[150][6] = {
  * @brief  The application entry point.
  * @retval int
  */
-int main(void)
-{
+int main(int argc, char *argv[]) {
+    // Valores padrão
+    int threads = 4;
+    int num_reps = 100;
+    
+    // Ler argumentos da linha de comando
+    if (argc >= 2) {
+        threads = atoi(argv[1]);
+    }
+    if (argc >= 3) {
+        num_reps = atoi(argv[2]);
+    }
     // dimensions of csv file
     int n_estimators = 10; // n_estimators = number of trees in the foreset
     // int rowsTree = 8-1;
@@ -365,7 +367,7 @@ int main(void)
     //  int maxMaxNodesTree = 10;
     int i;
 #if PARALLEL
-    omp_set_num_threads(THREADS);
+    omp_set_num_threads(threads);
     omp_set_dynamic(0);
 #endif
 
@@ -376,7 +378,7 @@ int main(void)
     double min_execution_time = __DBL_MAX__;
     double max_execution_time = 0.0;
 
-    for (int j = 0; j < NUM_REPS; j++)
+    for (int j = 0; j < num_reps; j++)
     {
         double start_time = omp_get_wtime();
         int totalRows = 0;
@@ -464,13 +466,13 @@ int main(void)
         if (rep_total_time > max_execution_time)
             max_execution_time = rep_total_time;
     }
-    double avg_prediction_time = total_prediction_time / NUM_REPS;
-    double avg_execution_time = total_execution_time / NUM_REPS;
-    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", NUM_REPS);
+    double avg_prediction_time = total_prediction_time / num_reps;
+    double avg_execution_time = total_execution_time / num_reps;
+    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", num_reps);
 #if PARALLEL
     printf("------ PARALELO ------\n");
 #endif
-    printf("Threads disponíveis: %d, Utilizadas: %d\n", omp_get_max_threads(), THREADS);
+    printf("threads disponíveis: %d, Utilizadas: %d\n", omp_get_max_threads(), threads);
 
     printf("\nTempo de PREDIÇÃO:\n");
     printf("  Média: %.6f segundos\n", avg_prediction_time);
