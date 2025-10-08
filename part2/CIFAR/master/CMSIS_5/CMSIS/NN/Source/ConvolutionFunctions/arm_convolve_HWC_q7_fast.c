@@ -31,9 +31,6 @@
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
 #include <omp.h>
-#include <stdint.h>
-#include <stdio.h>
-
 
 #ifndef PARALLEL
 #define PARALLEL 0
@@ -375,8 +372,7 @@ arm_convolve_HWC_q7_fast(const q7_t *Im_in,
 
     {
 #if PARALLEL
-        printf("------PARALLEL-----\n");
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic) private(i, j, k, l, m, n, conv_out, in_row, in_col)
 #endif
         for (i = 0; i < ch_im_out; i++)
         {
