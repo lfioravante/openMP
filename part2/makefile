@@ -10,86 +10,57 @@ NN_DIR = NN
 RF_DIR = RF
 SVM_DIR = SVM
 
-# Target Executable Names
-TARGET_NN_SEQ = nn_seq
-TARGET_RF_SEQ = rf_seq
-TARGET_SVM_SEQ = svm_seq
 
-TARGET_NN_PAR = nn_par
-TARGET_RF_PAR = rf_par
-TARGET_SVM_PAR = svm_par
+TARGET_NN = nn.exe
+TARGET_RF = rf.exe
+TARGET_SVM = svm.exe
 
 # Default parameters
 THREADS ?= 4
 PARALLEL ?= 1
+NUM_REPS ?= 10
 
 # Default target
-all: $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVM_SEQ) $(TARGET_SVM_PAR)
+all: $(TARGET_NN) $(TARGET_RF)  $(TARGET_SVM)
 
 # --- Build Rules ---
 
-# Sequential Versions
-$(TARGET_NN_SEQ): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -DTHREADS=1 -o $@ $< $(LDLIBS)
+$(TARGET_NN): $(NN_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=$(PARALLEL) -DTHREADS=$(THREADS) -DNUM_REPS=$(NUM_REPS) -o $@ $< $(LDLIBS)
 
-$(TARGET_RF_SEQ): $(RF_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -DTHREADS=1 -o $@ $< $(LDLIBS)
+$(TARGET_RF): $(RF_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=$(PARALLEL) -DTHREADS=$(THREADS) -DNUM_REPS=$(NUM_REPS) -o $@ $< $(LDLIBS)
 
-$(TARGET_SVM_SEQ): $(SVM_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -DTHREADS=1 -o $@ $< $(LDLIBS)
-
-# Parallel Versions
-$(TARGET_NN_PAR): $(NN_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DTHREADS=$(THREADS) -o $@ $< $(LDLIBS)
-
-$(TARGET_RF_PAR): $(RF_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DTHREADS=$(THREADS) -o $@ $< $(LDLIBS)
-
-$(TARGET_SVM_PAR): $(SVM_DIR)/main.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DTHREADS=$(THREADS) -o $@ $< $(LDLIBS)
+$(TARGET_SVM): $(SVM_DIR)/main.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=$(PARALLEL) -DTHREADS=$(THREADS) -DNUM_REPS=$(NUM_REPS) -o $@ $< $(LDLIBS)
 
 
 # --- Run Rules ---
 
 run_nn: clean
-ifeq ($(PARALLEL), 0)
-	@$(MAKE) $(TARGET_NN_SEQ) > /dev/null
-	./$(TARGET_NN_SEQ) $(THREADS)
-else
-	@$(MAKE) $(TARGET_NN_PAR) > /dev/null
-	./$(TARGET_NN_PAR) $(THREADS)
-endif
+	@$(MAKE) $(TARGET_NN) > /dev/null
+	./$(TARGET_NN) $(THREADS)
 
 run_rf: clean
-ifeq ($(PARALLEL), 0)
-	@$(MAKE) $(TARGET_RF_SEQ) > /dev/null
-	./$(TARGET_RF_SEQ) $(THREADS)
-else
-	@$(MAKE) $(TARGET_RF_PAR) > /dev/null
-	./$(TARGET_RF_PAR) $(THREADS)
-endif
+	@$(MAKE) $(TARGET_RF) > /dev/null
+	./$(TARGET_RF) $(THREADS)
 
 run_svm: clean
-ifeq ($(PARALLEL), 0)
-	@$(MAKE) $(TARGET_SVM_SEQ) > /dev/null
-	./$(TARGET_SVM_SEQ) $(THREADS)
-else
-	@$(MAKE) $(TARGET_SVM_PAR) > /dev/null
-	./$(TARGET_SVM_PAR) $(THREADS)
-endif
+	@$(MAKE) $(TARGET_SVM) > /dev/null
+	./$(TARGET_SVM) $(THREADS)
 
 
 # --- Maintenance ---
 
 clean:
-	rm -f $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVM_SEQ) $(TARGET_SVM_PAR) *.o
+	rm -f $(TARGET_NN) $(TARGET_RF) $(TARGET_SVM) *.o
 
 help:
 	@echo "Available targets:"
 	@echo "  all        - Build all sequential and parallel versions"
-	@echo "  run_nn     - Run NN version. Default is parallel."
-	@echo "  run_rf     - Run RF version. Default is parallel."
-	@echo "  run_svm    - Run SVM version. Default is parallel."
+	@echo "  run_nn     - Run NN version. Default is PARALLEL."
+	@echo "  run_rf     - Run RF version. Default is PARALLEL."
+	@echo "  run_svm    - Run SVM version. Default is PARALLEL."
 	@echo "  clean      - Remove compiled binaries"
 	@echo ""
 	@echo "How to run sequential version:"

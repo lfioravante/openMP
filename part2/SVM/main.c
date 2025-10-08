@@ -10,21 +10,8 @@
 #define THREADS 1
 #endif
 
-#define NUM_COLS 2
-#define RANDOM_SAMPLE 1
-
-#if RANDOM_SAMPLE
-#define NUM_ROWS 10000000
-#else
-#define NUM_ROWS 150
-#endif
-
-#if RANDOM_SAMPLE
-float min0 = 1.0, max0 = 6.9;
-float min1 = 0.1, max1 = 2.5;
-
-// Alocação estática
-float samples[NUM_ROWS][NUM_COLS];
+#ifndef NUM_REPS
+#define NUM_REPS 10
 #endif
 
 float set_vers_svs[16][2] = {
@@ -154,15 +141,6 @@ final_classes_t classify(float vals[])
 int main()
 {
 
-#if RANDOM_SAMPLE
-    for (int i = 0; i < NUM_ROWS; i++)
-    {
-        // Gerar valores dentro dos intervalos encontrados
-        samples[i][0] = min0 + (float)rand() / RAND_MAX * (max0 - min0);
-        samples[i][1] = min1 + (float)rand() / RAND_MAX * (max1 - min1);
-    }
-    const int num_samples = NUM_ROWS;
-#else
     float samples[150][2] = {
         {1.4, 0.2},
         {1.4, 0.2},
@@ -314,48 +292,68 @@ int main()
         {5.2, 2.0},
         {5.4, 2.3},
         {5.1, 1.8}};
-    const int num_samples = 150;
-#endif
-    double start_time = omp_get_wtime();
+
     float results[3];
-    (void)results;
-
-#if RANDOM_SAMPLE
-    printf("------Calculando para 10M sample, aguarde...------\n");
-#endif
-
+    unsigned num_samples = 150;
+#if PARALLEL
     // Configuração do número de threads
     omp_set_num_threads(THREADS);
+#endif
+
+    double total_execution_time = 0.0;
+    double total_avg_prediction_time = 0.0;
+    double min_execution_time = __DBL_MAX__;
+    double max_execution_time = 0.0;
+
+    for (int j = 0; j < NUM_REPS; j++)
+    {
+        double start_time = omp_get_wtime();
 #if PARALLEL
 // Paralelização do loop principal com agendamento estático
 #pragma omp parallel for
 #endif
-    for (int i = 0; i < num_samples; i++)
-    {
+        for (int i = 0; i < num_samples; i++)
+        {
 
-        results[0] = svm_compute(samples[i], 2, set_vers_svs, set_vers_alphas, set_vers_bias);
-        results[1] = svm_compute(samples[i], 2, set_virg_svs, set_virg_alphas, set_virg_bias);
-        results[2] = svm_compute(samples[i], 16, versi_virg_svs, versi_virg_alphas, versi_virg_bias);
-#if !RANDOM_SAMPLE
+            results[0] = svm_compute(samples[i], 2, set_vers_svs, set_vers_alphas, set_vers_bias);
+            results[1] = svm_compute(samples[i], 2, set_virg_svs, set_virg_alphas, set_virg_bias);
+            results[2] = svm_compute(samples[i], 16, versi_virg_svs, versi_virg_alphas, versi_virg_bias);
 #if PARALLEL
 #pragma omp critical
 #endif
-        {
-            printf("%3d: ", i);
-            printf("%5f, ", results[0]);
-            printf("%5f, ", results[1]);
-            printf("%5f\n", results[2]);
-            printf("Final class -> %d\n", classify(results));
+            {
+                printf("%3d: ", i);
+                printf("%5f, ", results[0]);
+                printf("%5f, ", results[1]);
+                printf("%5f\n", results[2]);
+                printf("Final class -> %d\n", classify(results));
+            }
         }
-#endif
-    }
-    double total_time = omp_get_wtime() - start_time;
-    double avg_time = total_time / num_samples;
+        double rep_total_time = omp_get_wtime() - start_time;
+        double rep_avg_time = rep_total_time / num_samples;
 
-#if (PARALLEL != 0)
-    printf("------PARALELO------\n");
+        // Accumulate times for average calculation
+        total_execution_time += rep_total_time;
+        total_avg_prediction_time += rep_avg_time;
+
+        // Update min and max times
+        if (rep_total_time < min_execution_time)
+            min_execution_time = rep_total_time;
+        if (rep_total_time > max_execution_time)
+            max_execution_time = rep_total_time;
+    }
+    // Calculate averages
+    double avg_execution_time = total_execution_time / NUM_REPS;
+    double avg_prediction_time = total_avg_prediction_time / NUM_REPS;
+
+    // Print final results
+    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", NUM_REPS);
+#if PARALLEL
+    printf("------ PARALELO ------\n");
 #endif
-    printf("Threads disponíveis: %d Utilizadas: %d\n", omp_get_max_threads(), THREADS);
-    printf("Tempo de médio por predição: %.6f segundos\n", avg_time);
-    printf("Tempo total de execução: %.6f segundos\n", total_time);
+    printf("Threads disponíveis: %d, Utilizadas: %d\n", omp_get_max_threads(), THREADS);
+    printf("Tempo médio por predição: %.6f segundos\n", avg_prediction_time);
+    printf("Tempo total médio de execução: %.6f segundos\n", avg_execution_time);
+    printf("Tempo total mínimo: %.6f segundos\n", min_execution_time);
+    printf("Tempo total máximo: %.6f segundos\n", max_execution_time);
 }

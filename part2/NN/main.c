@@ -62,6 +62,10 @@
 #define THREADS 1
 #endif
 
+#ifndef NUM_REPS
+#define NUM_REPS 1
+#endif
+
 typedef struct linked_list linked_list_t;
 
 linked_list_t *new_linked_list();
@@ -128,8 +132,9 @@ int main(void)
 
     //
     int i;
-    double start_time, end_time, total_time;
-    double data_processing_time = 0.0;
+    double total_processing_time = 0.0;
+    double min_time = __DBL_MAX__;
+    double max_time = 0.0;
 
     neural_net_t *neural_net = create_neural_net();
 
@@ -323,40 +328,56 @@ int main(void)
         {148, 6.2, 3.4, 5.4, 2.3, 2.0},
         {149, 5.9, 3.0, 5.1, 1.8, 2.0}};
 
+#if PARALLEL
+    omp_set_num_threads(THREADS);
+    omp_set_dynamic(0);
+#endif
+
     printf("=== CONFIGURAÇÃO ===\n");
     printf("Modo: %s\n", PARALLEL ? "PARALELO" : "SEQUENCIAL");
     printf("Threads disponíveis: %d\n", PARALLEL ? omp_get_max_threads() : 1);
 
-    // Medir tempo de processamento dos dados   
-    start_time = omp_get_wtime();
-    int correct_predictions = 0;
+    for (int j = 0; j < NUM_REPS; j++)
+    { // Medir tempo de processamento dos dados
+        double start_time = omp_get_wtime();
+        int correct_predictions = 0;
 
-    double *result;
+        double *result;
 
-    // Diretiva OpenMP para controle paralelo/sequencial
+        // Diretiva OpenMP para controle paralelo/sequencial
 #if PARALLEL
-    omp_set_num_threads(THREADS);
-    omp_set_dynamic(0);
 #pragma omp parallel for if (PARALLEL) schedule(dynamic, 10) reduction(+ : correct_predictions) private(result)
 #endif
-    for (i = 0; i < 150; i++)
-    {
-        result = neural_net_run(neural_net, test_data[i] + 1, 4);
+        for (i = 0; i < 150; i++)
+        {
+            result = neural_net_run(neural_net, test_data[i] + 1, 4);
 #if PARALLEL
 #pragma omp critical
 #endif
-        printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+            printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
 
-        free(result);
+            free(result);
+        }
+
+        double end_time = omp_get_wtime();
+        double rep_time = end_time - start_time;
+        total_processing_time += rep_time;
+
+        // Atualizar min e max
+        if (rep_time < min_time)
+            min_time = rep_time;
+        if (rep_time > max_time)
+            max_time = rep_time;
     }
 
-    end_time = omp_get_wtime();
-    data_processing_time = end_time - start_time;
+    double avg_processing_time = total_processing_time / NUM_REPS;
 
-    printf("\n=== RESULTADOS ===\n");
-    printf("Tempo de processamento dos dados: %.6f segundos\n", data_processing_time);
-    printf("Tempo médio por amostra: %.6f segundos\n", data_processing_time / 150);
-
+    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", NUM_REPS);
+    printf("Tempo total de processamento: %.6f segundos\n", total_processing_time);
+    printf("Tempo médio por repetição: %.6f segundos\n", avg_processing_time);
+    printf("Tempo mínimo: %.6f segundos\n", min_time);
+    printf("Tempo máximo: %.6f segundos\n", max_time);
+    printf("Tempo médio por amostra: %.6f segundos\n", avg_processing_time / 150);
     /* USER CODE END */
 
     return 0;
