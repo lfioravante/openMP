@@ -242,7 +242,7 @@ arm_convolve_HWC_q7_RGB(const q7_t * Im_in,
         return ARM_MATH_SIZE_MISMATCH;
     }
 #if PARALLEL
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic) private(i, j, k, l, m, n, conv_out, in_row, in_col)
 #endif
     for (i = 0; i < ch_im_out; i++)
     {
