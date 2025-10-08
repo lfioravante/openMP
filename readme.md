@@ -25,7 +25,6 @@ O principal objetivo desta etapa é se familiarizar com a programação paralela
 
 Foram criadas duas implementações principais em C:
 
-* **`matrix_fixed.c`**: Uma implementação que multiplica matrizes de tamanho fixo (mínimo de 4x4) e suporta um número variável de threads.
 * **`matrix_generic.c`**: Uma implementação genérica que permite a multiplicação de matrizes de qualquer dimensão, com o número de threads sendo configurável em tempo de execução.
 
 ---
