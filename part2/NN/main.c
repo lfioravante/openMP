@@ -335,7 +335,6 @@ int main(int argc, char *argv[])
 
 #if PARALLEL
     omp_set_num_threads(threads);
-    omp_set_dynamic(0);
 #endif
 
     for (int j = 0; j < num_reps; j++)
@@ -344,22 +343,18 @@ int main(int argc, char *argv[])
         int correct_predictions = 0;
 
         double *result;
-
-        // Diretiva OpenMP para controle paralelo/sequencial
+        (void)result;
 #if PARALLEL
-#pragma omp parallel for if (PARALLEL) schedule(dynamic, 10) reduction(+ : correct_predictions) private(result)
+        #pragma omp parallel for if (PARALLEL) schedule(dynamic) reduction(+ : correct_predictions) private(result)
 #endif
         for (i = 0; i < 150; i++)
         {
             result = neural_net_run(neural_net, test_data[i] + 1, 4);
-#if PARALLEL
-#pragma omp critical
-#endif
-            printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+
+            //printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
 
             free(result);
         }
-
         double end_time = omp_get_wtime();
         double rep_time = end_time - start_time;
         total_processing_time += rep_time;
@@ -370,18 +365,17 @@ int main(int argc, char *argv[])
         if (rep_time > max_time)
             max_time = rep_time;
     }
-
     double avg_processing_time = total_processing_time / num_reps;
 
-    printf("=== CONFIGURAÇÃO ===\n");
+    printf("=== CONFIGURACAO ===\n");
     printf("Modo: %s\n", PARALLEL ? "PARALELO" : "SEQUENCIAL");
-    printf("threads disponíveis: %d\n", PARALLEL ? omp_get_max_threads() : 1);
-    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", num_reps);
+    printf("threads disponiveis: %d\n", PARALLEL ? omp_get_max_threads() : 1);
+    printf("\n=== RESULTADOS (Media de %d repeticoes) ===\n", num_reps);
     printf("Tempo total de processamento: %.6f segundos\n", total_processing_time);
-    printf("Tempo médio por repetição: %.6f segundos\n", avg_processing_time);
-    printf("Tempo mínimo: %.6f segundos\n", min_time);
-    printf("Tempo máximo: %.6f segundos\n", max_time);
-    printf("Tempo médio por amostra: %.6f segundos\n", avg_processing_time / 150);
+    printf("Tempo medio por repeticao: %.6f segundos\n", avg_processing_time);
+    printf("Tempo minimo: %.6f segundos\n", min_time);
+    printf("Tempo maximo: %.6f segundos\n", max_time);
+    printf("Tempo medio por amostra: %.6f segundos\n", avg_processing_time / 150);
     /* USER CODE END */
 
     return 0;
@@ -450,9 +444,6 @@ double _neuron_evaluate(neuron_t *neuron, double *data)
 
     int i;
     double result = 0;
-#if PARALLEL
-#pragma omp simd reduction(+ : result) if (PARALLEL)
-#endif
     for (i = 0; i < neuron->n_weights; i++)
     {
 

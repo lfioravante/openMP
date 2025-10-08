@@ -468,22 +468,22 @@ int main(int argc, char *argv[]) {
     }
     double avg_prediction_time = total_prediction_time / num_reps;
     double avg_execution_time = total_execution_time / num_reps;
-    printf("\n=== RESULTADOS (Média de %d repetições) ===\n", num_reps);
+    printf("\n=== RESULTADOS (Média de %d repeticoes) ===\n", num_reps);
 #if PARALLEL
     printf("------ PARALELO ------\n");
 #endif
-    printf("threads disponíveis: %d, Utilizadas: %d\n", omp_get_max_threads(), threads);
+    printf("threads disponiveis: %d, Utilizadas: %d\n", omp_get_max_threads(), threads);
 
-    printf("\nTempo de PREDIÇÃO:\n");
-    printf("  Média: %.6f segundos\n", avg_prediction_time);
-    printf("  Mínimo: %.6f segundos\n", min_prediction_time);
-    printf("  Máximo: %.6f segundos\n", max_prediction_time);
-    printf("  Tempo médio por amostra: %.6f segundos\n", avg_prediction_time / 75);
+    printf("\nTempo de PREDIcaO:\n");
+    printf("  Media: %.6f segundos\n", avg_prediction_time);
+    printf("  Minimo: %.6f segundos\n", min_prediction_time);
+    printf("  Maximo: %.6f segundos\n", max_prediction_time);
+    printf("  Tempo medio por amostra: %.6f segundos\n", avg_prediction_time / 75);
 
-    printf("\nTempo TOTAL de execução:\n");
-    printf("  Média: %.6f segundos\n", avg_execution_time);
-    printf("  Mínimo: %.6f segundos\n", min_execution_time);
-    printf("  Máximo: %.6f segundos\n", max_execution_time);
+    printf("\nTempo TOTAL de execucao:\n");
+    printf("  Media: %.6f segundos\n", avg_execution_time);
+    printf("  Minimo: %.6f segundos\n", min_execution_time);
+    printf("  Maximo: %.6f segundos\n", max_execution_time);
     return 0;
 }
 
