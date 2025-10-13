@@ -122,18 +122,14 @@ int classify(double *results, int size_results)
 int main(int argc, char *argv[])
 {
     // Valores padrão
-    int threads = 4;
+    int threads = 1;
     int num_reps = 100;
 
     // Ler argumentos da linha de comando
     if (argc >= 2)
-    {
         threads = atoi(argv[1]);
-    }
     if (argc >= 3)
-    {
         num_reps = atoi(argv[2]);
-    }
 
     //
     int i;

@@ -8,48 +8,38 @@ OMP_FLAG = -fopenmp
 TARGET_SEQ = matrix_multiply_seq
 TARGET_PAR = matrix_multiply_par
 
-# Default parameters (can be overridden)
-MATRIX_SIZE ?= 1000
-THREADS ?= 4
-REPETITIONS ?= 10
+TARGET_FSEQ = matrix_fixed_seq
+TARGET_FPAR = matrix_fixed_par
 
 # Default target
-all: $(TARGET_SEQ) $(TARGET_PAR)
+all: $(TARGET_SEQ) $(TARGET_PAR) $(TARGETF_PAR) $(TARGETF_SEQ)
 
-# Sequential version (no OpenMP)
+# Todos estão compilados com o OpenMP para utilizar a função de tempo - omp_get_wtime()
 # Cria um diretório 'tmp' e força o compilador a usá-lo para arquivos temporários
-$(TARGET_SEQ): Generic_Serial_Matrix_Multi.c
-	$(CC) $(CFLAGS) -DPARALLEL=0 -DREPETITIONS=$(REPETITIONS) -o $@ $<
+$(TARGET_SEQ): ./matrix_dimension/Generic_Serial_Matrix_Multi.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0  -o $@ $<
 
 # Parallel version (with OpenMP)
-$(TARGET_PAR): Generic_Serial_Matrix_Multi.c
-	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -DREPETITIONS=$(REPETITIONS) -o $@ $<
+$(TARGET_PAR): ./matrix_dimension/Generic_Serial_Matrix_Multi.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $<
+
+$(TARGETF_SEQ): ./matrix_fixed_input/Generic_Serial_Matrix_Fixed.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0  -o $@ $<
+
+# Parallel version (with OpenMP)
+$(TARGETF_PAR): ./matrix_fixed_input/Generic_Serial_Matrix_Fixed.c
+	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $<
 
 # Run sequential version
 # CORRIGIDO: Removido '.exe' para compatibilidade com Linux/WSL
-run_seq: $(TARGET_SEQ)
-	./$(TARGET_SEQ) $(MATRIX_SIZE) $(THREADS)
+run_seq: $(TARGET_SEQ) $(TARGETF_SEQ)
 
 # Run parallel version
 # CORRIGIDO: Removido '.exe' para compatibilidade com Linux/WSL
-run_par: $(TARGET_PAR)
-	./$(TARGET_PAR) $(MATRIX_SIZE) $(THREADS)
+run_par: $(TARGET_PAR) $(TARGETF_PAR)
 
 # Clean build artifacts
 # CORRIGIDO: Removido '.exe' dos alvos a serem limpos
 clean:
-	rm -f $(TARGET_SEQ) $(TARGET_PAR) *.o
+	rm -f $(TARGET_SEQ) $(TARGET_PAR) $(TARGETF_PAR) $(TARGETF_SEQ) *.o
 	rm -rf tmp
-
-# Help information
-help:
-	@echo "Available targets:"
-	@echo "  all              - Build both sequential and parallel versions"
-	@echo "  run_seq          - Run sequential version (iSize=$(MATRIX_SIZE))"
-	@echo "  run_par          - Run parallel version (iSize=$(MATRIX_SIZE), iThreads=$(THREADS))"
-	@echo "  clean            - Remove compiled binaries"
-	@echo ""
-	@echo "Override defaults:"
-	@echo "  make run_par MATRIX_SIZE=2000 THREADS=8 REPETITIONS=15"
-
-.PHONY: all run_seq run_par clean help
