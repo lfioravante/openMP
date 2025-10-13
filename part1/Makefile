@@ -1,5 +1,4 @@
 # Compiler and flags
-# Usar 'gcc' é mais portável. Garanta que o compilador esteja no PATH do sistema.
 CC = gcc
 CFLAGS = -O2 -Wall -std=c99 -g
 OMP_FLAG = -fopenmp
@@ -12,7 +11,7 @@ TARGET_FSEQ = matrix_fixed_seq
 TARGET_FPAR = matrix_fixed_par
 
 # Default target
-all: $(TARGET_SEQ) $(TARGET_PAR) $(TARGETF_PAR) $(TARGETF_SEQ)
+all: $(TARGET_SEQ) $(TARGET_PAR) $(TARGET_FPAR) $(TARGET_FSEQ)
 
 # Todos estão compilados com o OpenMP para utilizar a função de tempo - omp_get_wtime()
 # Cria um diretório 'tmp' e força o compilador a usá-lo para arquivos temporários
@@ -23,23 +22,20 @@ $(TARGET_SEQ): ./matrix_dimension/Generic_Serial_Matrix_Multi.c
 $(TARGET_PAR): ./matrix_dimension/Generic_Serial_Matrix_Multi.c
 	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $<
 
-$(TARGETF_SEQ): ./matrix_fixed_input/Generic_Serial_Matrix_Fixed.c
+$(TARGET_FSEQ): ./matrix_fixed_input/Generic_Serial_Matrix_Fixed.c
 	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0  -o $@ $<
 
 # Parallel version (with OpenMP)
-$(TARGETF_PAR): ./matrix_fixed_input/Generic_Serial_Matrix_Fixed.c
+$(TARGET_FPAR): ./matrix_fixed_input/Generic_Serial_Matrix_Fixed.c
 	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $<
 
 # Run sequential version
-# CORRIGIDO: Removido '.exe' para compatibilidade com Linux/WSL
-run_seq: $(TARGET_SEQ) $(TARGETF_SEQ)
+run_seq: $(TARGET_SEQ) $(TARGET_FSEQ)
 
 # Run parallel version
-# CORRIGIDO: Removido '.exe' para compatibilidade com Linux/WSL
-run_par: $(TARGET_PAR) $(TARGETF_PAR)
+run_par: $(TARGET_PAR) $(TARGET_FPAR)
 
 # Clean build artifacts
-# CORRIGIDO: Removido '.exe' dos alvos a serem limpos
 clean:
-	rm -f $(TARGET_SEQ) $(TARGET_PAR) $(TARGETF_PAR) $(TARGETF_SEQ) *.o
+	rm -f $(TARGET_SEQ) $(TARGET_PAR) $(TARGET_FPAR) $(TARGET_FSEQ) *.o
 	rm -rf tmp

@@ -9,13 +9,14 @@
 #include <unistd.h>
 #include <omp.h>
 
-// define the amount of rows which essentially sets the
-// size of the matrix as the rows = columns, therefore
-// a square matrix is generated
+
 #ifndef PARALLEL
 #define PARALLEL 0 // Default to sequencial mode
 #endif
 
+// define the amount of rows which essentially sets the
+// size of the matrix as the rows = columns, therefore
+// a square matrix is generated
 #define ROWS 4
 #define COLUMNS ROWS
 
