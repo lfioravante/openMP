@@ -124,18 +124,17 @@ q7_t col_buffer[2 * 5 * 5 * 32 * 2];
 
 q7_t scratch_buffer[32 * 32 * 10 * 4];
 
-int main(int argc, char *argv[]) {
-    // Valores padrão
-    int threads = 4;
-    int num_reps = 100;
-    
-    // Ler argumentos da linha de comando
-    if (argc >= 2) {
+// Valores padrão
+int threads = 1;
+int num_reps = 100;
+
+int main(int argc, char *argv[])
+{
+
+    if (argc >= 2)
         threads = atoi(argv[1]);
-    }
-    if (argc >= 3) {
+    if (argc >= 3)
         num_reps = atoi(argv[2]);
-    }
 
     printf("Startup\n");
     /* start the execution */
@@ -160,186 +159,187 @@ int main(int argc, char *argv[]) {
     }
 #if PARALLEL
     omp_set_num_threads(threads);
-#endif  
+#endif
 
-    for(int i = 0; i < num_reps; i++) {
-    double repetition_start_time = omp_get_wtime();
+    for (int i = 0; i < num_reps; i++)
+    {
+        double repetition_start_time = omp_get_wtime();
 
-    start_time = omp_get_wtime();
-    // conv1 img_buffer2 -> img_buffer1
-    //------------Alterar--------------
-    //printf("Convolution - Layer 1\n");
-    arm_convolve_HWC_q7_RGB(img_buffer2,
-                            CONV1_IM_DIM,
-                            CONV1_IM_CH,
-                            conv1_wt,
-                            CONV1_OUT_CH,
-                            CONV1_KER_DIM,
-                            CONV1_PADDING,
-                            CONV1_STRIDE,
-                            conv1_bias,
-                            CONV1_BIAS_LSHIFT,
-                            CONV1_OUT_RSHIFT,
-                            img_buffer1,
-                            CONV1_OUT_DIM,
-                            (q15_t *)col_buffer,
-                            NULL);
+        start_time = omp_get_wtime();
+        // conv1 img_buffer2 -> img_buffer1
+        //------------Alterar--------------
+        // printf("Convolution - Layer 1\n");
+        arm_convolve_HWC_q7_RGB(img_buffer2,
+                                CONV1_IM_DIM,
+                                CONV1_IM_CH,
+                                conv1_wt,
+                                CONV1_OUT_CH,
+                                CONV1_KER_DIM,
+                                CONV1_PADDING,
+                                CONV1_STRIDE,
+                                conv1_bias,
+                                CONV1_BIAS_LSHIFT,
+                                CONV1_OUT_RSHIFT,
+                                img_buffer1,
+                                CONV1_OUT_DIM,
+                                (q15_t *)col_buffer,
+                                NULL);
 
-    arm_relu_q7(img_buffer1,
-                CONV1_OUT_DIM * CONV1_OUT_DIM * CONV1_OUT_CH);
-    end_time = omp_get_wtime();
-    total_time_conv1 += (end_time - start_time);
+        arm_relu_q7(img_buffer1,
+                    CONV1_OUT_DIM * CONV1_OUT_DIM * CONV1_OUT_CH);
+        end_time = omp_get_wtime();
+        total_time_conv1 += (end_time - start_time);
 
-    // Layer 2: Pool1
-    start_time = omp_get_wtime();
-    // pool1 img_buffer1 -> img_buffer2
-    //printf("Max Pooling - Layer 2\n");
-    arm_maxpool_q7_HWC(img_buffer1,
-                       CONV1_OUT_DIM,
-                       CONV1_OUT_CH,
-                       POOL1_KER_DIM,
-                       POOL1_PADDING,
-                       POOL1_STRIDE,
-                       POOL1_OUT_DIM,
-                       NULL,
-                       img_buffer2);
-    end_time = omp_get_wtime();
-    total_time_pool1 += (end_time - start_time);
+        // Layer 2: Pool1
+        start_time = omp_get_wtime();
+        // pool1 img_buffer1 -> img_buffer2
+        // printf("Max Pooling - Layer 2\n");
+        arm_maxpool_q7_HWC(img_buffer1,
+                           CONV1_OUT_DIM,
+                           CONV1_OUT_CH,
+                           POOL1_KER_DIM,
+                           POOL1_PADDING,
+                           POOL1_STRIDE,
+                           POOL1_OUT_DIM,
+                           NULL,
+                           img_buffer2);
+        end_time = omp_get_wtime();
+        total_time_pool1 += (end_time - start_time);
 
-    // Layer 3: Conv2 + ReLU
-    start_time = omp_get_wtime();
-    // conv2 img_buffer2 -> img_buffer1
-    //------------Alterar--------------
-    //printf("Convolution - Layer 3\n");
-    arm_convolve_HWC_q7_fast(img_buffer2,
-                             CONV2_IM_DIM,
-                             CONV2_IM_CH,
-                             conv2_wt,
-                             CONV2_OUT_CH,
-                             CONV2_KER_DIM,
-                             CONV2_PADDING,
-                             CONV2_STRIDE,
-                             conv2_bias,
-                             CONV2_BIAS_LSHIFT,
-                             CONV2_OUT_RSHIFT,
-                             img_buffer1,
-                             CONV2_OUT_DIM,
-                             (q15_t *)col_buffer,
-                             NULL);
+        // Layer 3: Conv2 + ReLU
+        start_time = omp_get_wtime();
+        // conv2 img_buffer2 -> img_buffer1
+        //------------Alterar--------------
+        // printf("Convolution - Layer 3\n");
+        arm_convolve_HWC_q7_fast(img_buffer2,
+                                 CONV2_IM_DIM,
+                                 CONV2_IM_CH,
+                                 conv2_wt,
+                                 CONV2_OUT_CH,
+                                 CONV2_KER_DIM,
+                                 CONV2_PADDING,
+                                 CONV2_STRIDE,
+                                 conv2_bias,
+                                 CONV2_BIAS_LSHIFT,
+                                 CONV2_OUT_RSHIFT,
+                                 img_buffer1,
+                                 CONV2_OUT_DIM,
+                                 (q15_t *)col_buffer,
+                                 NULL);
 
-    arm_relu_q7(img_buffer1,
-                CONV2_OUT_DIM * CONV2_OUT_DIM * CONV2_OUT_CH);
-    end_time = omp_get_wtime();
-    total_time_conv2 += (end_time - start_time);
+        arm_relu_q7(img_buffer1,
+                    CONV2_OUT_DIM * CONV2_OUT_DIM * CONV2_OUT_CH);
+        end_time = omp_get_wtime();
+        total_time_conv2 += (end_time - start_time);
 
-    // Layer 4: Pool2
-    start_time = omp_get_wtime();
-    // pool2 img_buffer1 -> img_buffer2
-    //printf("Max Pooling - Layer 4\n");
-    arm_maxpool_q7_HWC(img_buffer1,
-                       CONV2_OUT_DIM,
-                       CONV2_OUT_CH,
-                       POOL2_KER_DIM,
-                       POOL2_PADDING,
-                       POOL2_STRIDE,
-                       POOL2_OUT_DIM,
-                       col_buffer,
-                       img_buffer2);
-    end_time = omp_get_wtime();
-    total_time_pool2 += (end_time - start_time);
+        // Layer 4: Pool2
+        start_time = omp_get_wtime();
+        // pool2 img_buffer1 -> img_buffer2
+        // printf("Max Pooling - Layer 4\n");
+        arm_maxpool_q7_HWC(img_buffer1,
+                           CONV2_OUT_DIM,
+                           CONV2_OUT_CH,
+                           POOL2_KER_DIM,
+                           POOL2_PADDING,
+                           POOL2_STRIDE,
+                           POOL2_OUT_DIM,
+                           col_buffer,
+                           img_buffer2);
+        end_time = omp_get_wtime();
+        total_time_pool2 += (end_time - start_time);
 
-    // Layer 5: Conv3 + ReLU
-    start_time = omp_get_wtime();
-    // conv3 img_buffer2 -> img_buffer1
-    //------------Alterar--------------
-    //printf("Convolution - Layer 5\n");
-    arm_convolve_HWC_q7_fast(img_buffer2,
-                             CONV3_IM_DIM,
-                             CONV3_IM_CH,
-                             conv3_wt,
-                             CONV3_OUT_CH,
-                             CONV3_KER_DIM,
-                             CONV3_PADDING,
-                             CONV3_STRIDE,
-                             conv3_bias,
-                             CONV3_BIAS_LSHIFT,
-                             CONV3_OUT_RSHIFT,
-                             img_buffer1,
-                             CONV3_OUT_DIM,
-                             (q15_t *)col_buffer,
-                             NULL);
+        // Layer 5: Conv3 + ReLU
+        start_time = omp_get_wtime();
+        // conv3 img_buffer2 -> img_buffer1
+        //------------Alterar--------------
+        // printf("Convolution - Layer 5\n");
+        arm_convolve_HWC_q7_fast(img_buffer2,
+                                 CONV3_IM_DIM,
+                                 CONV3_IM_CH,
+                                 conv3_wt,
+                                 CONV3_OUT_CH,
+                                 CONV3_KER_DIM,
+                                 CONV3_PADDING,
+                                 CONV3_STRIDE,
+                                 conv3_bias,
+                                 CONV3_BIAS_LSHIFT,
+                                 CONV3_OUT_RSHIFT,
+                                 img_buffer1,
+                                 CONV3_OUT_DIM,
+                                 (q15_t *)col_buffer,
+                                 NULL);
 
-    arm_relu_q7(img_buffer1,
-                CONV3_OUT_DIM * CONV3_OUT_DIM * CONV3_OUT_CH);
-    end_time = omp_get_wtime();
-    total_time_conv3 += (end_time - start_time);
+        arm_relu_q7(img_buffer1,
+                    CONV3_OUT_DIM * CONV3_OUT_DIM * CONV3_OUT_CH);
+        end_time = omp_get_wtime();
+        total_time_conv3 += (end_time - start_time);
 
-    // Layer 6: Pool3
-    start_time = omp_get_wtime();
-    // pool3 img_buffer-> img_buffer2
-    //printf("Max Pooling - Layer 6\n");
-    arm_maxpool_q7_HWC(img_buffer1,
-                       CONV3_OUT_DIM,
-                       CONV3_OUT_CH,
-                       POOL3_KER_DIM,
-                       POOL3_PADDING,
-                       POOL3_STRIDE,
-                       POOL3_OUT_DIM,
-                       col_buffer,
-                       img_buffer2);
+        // Layer 6: Pool3
+        start_time = omp_get_wtime();
+        // pool3 img_buffer-> img_buffer2
+        // printf("Max Pooling - Layer 6\n");
+        arm_maxpool_q7_HWC(img_buffer1,
+                           CONV3_OUT_DIM,
+                           CONV3_OUT_CH,
+                           POOL3_KER_DIM,
+                           POOL3_PADDING,
+                           POOL3_STRIDE,
+                           POOL3_OUT_DIM,
+                           col_buffer,
+                           img_buffer2);
 
-    end_time = omp_get_wtime();
-    total_time_pool3 += (end_time - start_time);
+        end_time = omp_get_wtime();
+        total_time_pool3 += (end_time - start_time);
 
-    // Layer 7: Fully-Connected
-    start_time = omp_get_wtime();
-    //printf("Fully-Connected - Layer 7\n");
-    arm_fully_connected_q7_opt(img_buffer2,
-                               ip1_wt,
-                               IP1_DIM,
-                               IP1_OUT,
-                               IP1_BIAS_LSHIFT,
-                               IP1_OUT_RSHIFT,
-                               ip1_bias,
-                               output_data,
-                               (q15_t *)img_buffer1);
+        // Layer 7: Fully-Connected
+        start_time = omp_get_wtime();
+        // printf("Fully-Connected - Layer 7\n");
+        arm_fully_connected_q7_opt(img_buffer2,
+                                   ip1_wt,
+                                   IP1_DIM,
+                                   IP1_OUT,
+                                   IP1_BIAS_LSHIFT,
+                                   IP1_OUT_RSHIFT,
+                                   ip1_bias,
+                                   output_data,
+                                   (q15_t *)img_buffer1);
 
-    end_time = omp_get_wtime();
-    total_time_fc += (end_time - start_time);
+        end_time = omp_get_wtime();
+        total_time_fc += (end_time - start_time);
 
-    // Layer 8: Softmax
-    start_time = omp_get_wtime();
-    arm_softmax_q7(output_data,
-                   10,
-                   output_data);
-    end_time = omp_get_wtime();
-    total_time_softmax += (end_time - start_time);
+        // Layer 8: Softmax
+        start_time = omp_get_wtime();
+        arm_softmax_q7(output_data,
+                       10,
+                       output_data);
+        end_time = omp_get_wtime();
+        total_time_softmax += (end_time - start_time);
 
-    total_inference_time += (omp_get_wtime() - repetition_start_time);
-}
+        total_inference_time += (omp_get_wtime() - repetition_start_time);
+    }
 
-// Calcular e imprimir tempos médios
-printf("---------------------------------------------------\n");
-printf("Average Execution Time Report (after %d runs)\n", num_reps);
-printf("---------------------------------------------------\n");
-printf("Layer 1 (Conv1 + ReLU): %.6f ms\n", (total_time_conv1 / num_reps) * 1000);
-printf("Layer 2 (MaxPool1)    : %.6f ms\n", (total_time_pool1 / num_reps) * 1000);
-printf("Layer 3 (Conv2 + ReLU): %.6f ms\n", (total_time_conv2 / num_reps) * 1000);
-printf("Layer 4 (MaxPool2)    : %.6f ms\n", (total_time_pool2 / num_reps) * 1000);
-printf("Layer 5 (Conv3 + ReLU): %.6f ms\n", (total_time_conv3 / num_reps) * 1000);
-printf("Layer 6 (MaxPool3)    : %.6f ms\n", (total_time_pool3 / num_reps) * 1000);
-printf("Layer 7 (FC)          : %.6f ms\n", (total_time_fc / num_reps) * 1000);
-printf("Layer 8 (Softmax)     : %.6f ms\n", (total_time_softmax / num_reps) * 1000);
-printf("---------------------------------------------------\n");
-printf("Total Average Inference Time: %.6f ms\n", (total_inference_time / num_reps) * 1000);
-printf("---------------------------------------------------\n\n");
+    // Calcular e imprimir tempos médios
+    printf("---------------------------------------------------\n");
+    printf("Average Execution Time Report (after %d runs)\n", num_reps);
+    printf("---------------------------------------------------\n");
+    printf("Layer 1 (Conv1 + ReLU): %.6f ms\n", (total_time_conv1 / num_reps) * 1000);
+    printf("Layer 2 (MaxPool1)    : %.6f ms\n", (total_time_pool1 / num_reps) * 1000);
+    printf("Layer 3 (Conv2 + ReLU): %.6f ms\n", (total_time_conv2 / num_reps) * 1000);
+    printf("Layer 4 (MaxPool2)    : %.6f ms\n", (total_time_pool2 / num_reps) * 1000);
+    printf("Layer 5 (Conv3 + ReLU): %.6f ms\n", (total_time_conv3 / num_reps) * 1000);
+    printf("Layer 6 (MaxPool3)    : %.6f ms\n", (total_time_pool3 / num_reps) * 1000);
+    printf("Layer 7 (FC)          : %.6f ms\n", (total_time_fc / num_reps) * 1000);
+    printf("Layer 8 (Softmax)     : %.6f ms\n", (total_time_softmax / num_reps) * 1000);
+    printf("---------------------------------------------------\n");
+    printf("Total Average Inference Time: %.6f ms\n", (total_inference_time / num_reps) * 1000);
+    printf("---------------------------------------------------\n\n");
 
-printf("Output classification:\n");
-for (int i = 0; i < 10; i++)
-{
-    printf("%d: %d\n", i, output_data[i]);
-}
-printf("Application end!\n");
+    printf("Output classification:\n");
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d: %d\n", i, output_data[i]);
+    }
+    printf("Application end!\n");
 
-return 0;
+    return 0;
 }

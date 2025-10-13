@@ -3,73 +3,75 @@
 #include <omp.h>
 #include <sys/time.h>
 
-
 // Parameters will be defined by Makefile compiler flags
 #ifndef PARALLEL
 #define PARALLEL 0 // Default to sequencial mode
 #endif
 
-#ifndef REPETITIONS
-#define REPETITIONS 1 // Default repetitions
-#endif
+// Default values for size, threads and repetitions
+int uSize = 100;
+int uThreads = 1;
+int uReps = 100;
 
-int fnbCheckMatrixResult(int **ppiMatrixA, int **ppiMatrixC, int iSize)
+int fnbCheckMatrixResult(int **ppiMatrixA, int **ppiMatrixC, int uSize)
 {
-	for (int i = 0; i < iSize; i++)
-		for (int j = 0; j < iSize; j++)
+	for (int i = 0; i < uSize; i++)
+		for (int j = 0; j < uSize; j++)
 			if (ppiMatrixC[i][j] != ppiMatrixA[i][j])
 				return 0;
 	return 1;
 }
 
-void fnvAllocateMatrices(int iSize, int ***ppiMatrixA, int ***ppiMatrixB, int ***ppiMatrixC)
+void fnvAllocateMatrices(int uSize, int ***ppiMatrixA, int ***ppiMatrixB, int ***ppiMatrixC)
 {
-	*ppiMatrixA = malloc(iSize * sizeof(int *));
-	*ppiMatrixB = malloc(iSize * sizeof(int *));
-	*ppiMatrixC = malloc(iSize * sizeof(int *));
+	*ppiMatrixA = malloc(uSize * sizeof(int *));
+	*ppiMatrixB = malloc(uSize * sizeof(int *));
+	*ppiMatrixC = malloc(uSize * sizeof(int *));
 
-	for (int i = 0; i < iSize; i++)
+	for (int i = 0; i < uSize; i++)
 	{
-		(*ppiMatrixA)[i] = malloc(iSize * sizeof(int));
-		(*ppiMatrixB)[i] = malloc(iSize * sizeof(int));
-		(*ppiMatrixC)[i] = calloc(iSize, sizeof(int));
+		(*ppiMatrixA)[i] = malloc(uSize * sizeof(int));
+		(*ppiMatrixB)[i] = malloc(uSize * sizeof(int));
+		(*ppiMatrixC)[i] = calloc(uSize, sizeof(int));
 	}
 }
 
-void fnvFillMatrix(int iSize, int **ppiMatrix)
+void fnvFillMatrix(int uSize, int **ppiMatrix)
 {
-	for (int i = 0; i < iSize; i++)
-		for (int j = 0; j < iSize; j++)
+	for (int i = 0; i < uSize; i++)
+		for (int j = 0; j < uSize; j++)
 			ppiMatrix[i][j] = j + 1;
 }
 
-void fnvCreateIdentityMatrix(int iSize, int **ppiMatrix)
+void fnvCreateIdentityMatrix(int uSize, int **ppiMatrix)
 {
-	for (int i = 0; i < iSize; i++)
-		for (int j = 0; j < iSize; j++)
+	for (int i = 0; i < uSize; i++)
+		for (int j = 0; j < uSize; j++)
 			ppiMatrix[i][j] = (i == j) ? 1 : 0;
 }
 
-void fnvZeroFillMatrix(int iSize, int **ppiMatrix)
+void fnvZeroFillMatrix(int uSize, int **ppiMatrix)
 {
-	for (int i = 0; i < iSize; i++)
-		for (int j = 0; j < iSize; j++)
+	for (int i = 0; i < uSize; i++)
+		for (int j = 0; j < uSize; j++)
 			ppiMatrix[i][j] = 0;
 }
 
-void fnvMultiplyMatrices(int iSize, int **ppiMatrixA, int **ppiMatrixB, int **ppiMatrixC)
+void fnvMultiplyMatrices(int uSize, int **ppiMatrixA, int **ppiMatrixB, int **ppiMatrixC)
 {
 // Matrix multiplication: C = A × B
-#pragma omp parallel for collapse(2) if (PARALLEL)
-	for (int i = 0; i < iSize; i++)
-		for (int j = 0; j < iSize; j++)
-			for (int k = 0; k < iSize; k++)
+#if PARALLEL
+#pragma omp parallel for collapse(2)
+#endif
+	for (int i = 0; i < uSize; i++)
+		for (int j = 0; j < uSize; j++)
+			for (int k = 0; k < uSize; k++)
 				ppiMatrixC[i][j] += ppiMatrixA[i][k] * ppiMatrixB[k][j];
 }
 
-void fnvFreeMatrices(int iSize, int **ppiMatrixA, int **ppiMatrixB, int **ppiMatrixC)
+void fnvFreeMatrices(int uSize, int **ppiMatrixA, int **ppiMatrixB, int **ppiMatrixC)
 {
-	for (int i = 0; i < iSize; i++)
+	for (int i = 0; i < uSize; i++)
 	{
 		free(ppiMatrixA[i]);
 		free(ppiMatrixB[i]);
@@ -82,21 +84,14 @@ void fnvFreeMatrices(int iSize, int **ppiMatrixA, int **ppiMatrixB, int **ppiMat
 
 int main(int argc, char *argv[])
 {
-	if (argc != 3)
-	{
-		printf("Usage: %s <iMatrixSize> <iThreadCount>\n", argv[0]);
-		printf("Compile-time settings: PARALLEL=%d, REPETITIONS=%d\n", PARALLEL, REPETITIONS);
-		return 1;
-	}
-#if !PARALLEL
+	// Input parameters: matrix size, number of threads, number of repetitions
+	if (argc >= 2)
+		uSize = atoi(argv[1]);
+	if (argc >= 3)
+		uThreads = atoi(argv[1]);
+	if (argc >= 4)
+		uReps = atoi(argv[2]);
 
-#endif
-	int iSize = atoi(argv[1]);
-#if PARALLEL
-	int iThreads = atoi(argv[2]);
-#else
-		struct timeval t1, t2;
-#endif
 	double dStartTime, dEndTime;
 	double dTotalTime = 0.0;
 	double dMinTime = 99999999999;
@@ -104,41 +99,30 @@ int main(int argc, char *argv[])
 
 	int **ppiMatrixA, **ppiMatrixB, **ppiMatrixC;
 #if PARALLEL
-	omp_set_num_threads(iThreads);
+	omp_set_num_threads(uThreads);
 #endif
 #if PARALLEL
-	printf("=== PARALLEL MODE (%d iThreads) ===\n", iThreads);
+	printf("=== PARALLEL MODE (%d uThreads) ===\n", uThreads);
 #else
 	printf("=== SEQUENTIAL MODE ===\n");
 #endif
 
-	printf("Repetitions: %d\n", REPETITIONS);
-	printf("Matrix size: %dx%d\n", iSize, iSize);
+	printf("Repetitions: %d\n", uReps);
+	printf("Matrix size: %dx%d\n", uSize, uSize);
 
-	fnvAllocateMatrices(iSize, &ppiMatrixA, &ppiMatrixB, &ppiMatrixC);
-	fnvFillMatrix(iSize, ppiMatrixA);
-	fnvCreateIdentityMatrix(iSize, ppiMatrixB);
+	fnvAllocateMatrices(uSize, &ppiMatrixA, &ppiMatrixB, &ppiMatrixC);
+	fnvFillMatrix(uSize, ppiMatrixA);
+	fnvCreateIdentityMatrix(uSize, ppiMatrixB);
 
 	// Multiple executions for average calculation
-	for (int i = 0; i < REPETITIONS; i++)
+	for (int i = 0; i < uReps; i++)
 	{
-		fnvZeroFillMatrix(iSize, ppiMatrixC);
+		fnvZeroFillMatrix(uSize, ppiMatrixC);
 
-#if PARALLEL
 		dStartTime = omp_get_wtime();
-#else
-		gettimeofday(&t1, NULL); 
-#endif
-
-		fnvMultiplyMatrices(iSize, ppiMatrixA, ppiMatrixB, ppiMatrixC);
-
-#if PARALLEL
+		fnvMultiplyMatrices(uSize, ppiMatrixA, ppiMatrixB, ppiMatrixC);
 		dEndTime = omp_get_wtime();
 		double dCurrentTime = (dEndTime - dStartTime) * 1000.0;
-#else
-		gettimeofday(&t2, NULL);
-		double dCurrentTime = (t2.tv_sec - t1.tv_sec) * 1000.0 + (t2.tv_usec - t1.tv_usec) / 1000.0;
-#endif
 
 		dTotalTime += dCurrentTime;
 
@@ -149,10 +133,10 @@ int main(int argc, char *argv[])
 
 		printf("Execution %2d: %f ms\n", i + 1, dCurrentTime);
 	}
-#if PARALLEL
+
 	// Result verification (only on last execution)
 	printf("Verifying result...\n");
-	if (fnbCheckMatrixResult(ppiMatrixA, ppiMatrixC, iSize))
+	if (fnbCheckMatrixResult(ppiMatrixA, ppiMatrixC, uSize))
 	{
 		printf("✓ Result CORRECT! A × I = A\n");
 	}
@@ -160,9 +144,8 @@ int main(int argc, char *argv[])
 	{
 		printf("✗ Result INCORRECT!\n");
 	}
-#endif
 	// Statistics
-	double dAverageTime = dTotalTime / REPETITIONS;
+	double dAverageTime = dTotalTime / uReps;
 	printf("\n=== STATISTICS ===\n");
 	printf("Average time: %f ms\n", dAverageTime);
 	printf("Minimum time: %f ms\n", dMinTime);
@@ -170,7 +153,7 @@ int main(int argc, char *argv[])
 	printf("Variation: ±%f ms\n", (dMaxTime - dMinTime) / 2);
 	printf("Speedup (min/max): %.2fx\n", dMaxTime / dMinTime);
 
-	fnvFreeMatrices(iSize, ppiMatrixA, ppiMatrixB, ppiMatrixC);
+	fnvFreeMatrices(uSize, ppiMatrixA, ppiMatrixB, ppiMatrixC);
 
 	return 0;
 }
