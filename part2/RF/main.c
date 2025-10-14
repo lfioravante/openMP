@@ -417,19 +417,19 @@ int main(int argc, char *argv[])
 #endif
         for (int j = 0; j < 75; j++)
         {
-#if (PARALLEL != 0)
-#pragma omp critical
-#endif
-            {
-                printf("%d ->", j);
+// #if (PARALLEL != 0)
+// #pragma omp critical
+// #endif
+//             {
+//                 printf("%d ->", j);
 
-                for (i = 0; i < 4; i++)
-                {
-                    printf("%f, ", test_data[j][i]);
-                }
+//                 for (i = 0; i < 4; i++)
+//                 {
+//                     printf("%f, ", test_data[j][i]);
+//                 }
 
-                printf(" -> ");
-            }
+//                 printf(" -> ");
+//             }
 #if (PARALLEL != 0)
 #pragma omp parallel for
 #endif
@@ -437,16 +437,16 @@ int main(int argc, char *argv[])
             {
                 predictions[i] = predict(rf[i], test_data[j]);
             }
-#if (PARALLEL != 0)
-#pragma omp critical
-#endif
-            {
-                for (i = 0; i < n_estimators; i++)
-                {
-                    printf("%.5f,", predictions[i]);
-                }
-                printf("-> %f \n", majority_vote_predict(predictions, n_estimators));
-            }
+            // #if (PARALLEL != 0)
+            // #pragma omp critical
+            // #endif
+            //             {
+            //                 for (i = 0; i < n_estimators; i++)
+            //                 {
+            //                     printf("%.5f,", predictions[i]);
+            //                 }
+            //                 printf("-> %f \n", majority_vote_predict(predictions, n_estimators));
+            //             }
         }
 
         double prediction_time = omp_get_wtime() - prediction_start;
