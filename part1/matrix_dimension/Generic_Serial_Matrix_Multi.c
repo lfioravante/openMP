@@ -86,11 +86,11 @@ int main(int argc, char *argv[])
 {
 	// Input parameters: matrix size, number of threads, number of repetitions
 	if (argc >= 2)
-		uSize = atoi(argv[1]);
+		uReps = atoi(argv[1]);
 	if (argc >= 3)
-		uThreads = atoi(argv[1]);
+		uSize = atoi(argv[2]);
 	if (argc >= 4)
-		uReps = atoi(argv[2]);
+		uThreads = atoi(argv[3]);
 
 	double dStartTime, dEndTime;
 	double dTotalTime = 0.0;
@@ -130,8 +130,6 @@ int main(int argc, char *argv[])
 			dMinTime = dCurrentTime;
 		if (dCurrentTime > dMaxTime)
 			dMaxTime = dCurrentTime;
-
-		printf("Execution %2d: %f ms\n", i + 1, dCurrentTime);
 	}
 
 	// Result verification (only on last execution)
