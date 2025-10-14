@@ -408,6 +408,7 @@ int main(int argc, char *argv[])
         double accuracy;
         float sample[6];
         float predictions[10];
+        (void)predictions;
         char send_string[300];
 
         double prediction_start = omp_get_wtime();

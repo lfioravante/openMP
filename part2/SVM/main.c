@@ -294,6 +294,7 @@ int main(int argc, char *argv[])
         {5.4, 2.3, 148.0},
         {5.1, 1.8, 149.0}};
     float results[4];
+    (void)results;
     unsigned num_samples = 150;
 #if PARALLEL
     // Configuração do número de threads
