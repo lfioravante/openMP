@@ -132,9 +132,9 @@ int main(int argc, char *argv[])
 {
 
     if (argc >= 2)
-        threads = atoi(argv[1]);
+        num_reps = atoi(argv[1]);
     if (argc >= 3)
-        num_reps = atoi(argv[2]);
+        threads = atoi(argv[2]);
 
     printf("Startup\n");
     /* start the execution */
