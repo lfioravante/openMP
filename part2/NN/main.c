@@ -348,10 +348,10 @@ int main(int argc, char *argv[])
         for (i = 0; i < 150; i++)
         {
             result = neural_net_run(neural_net, test_data[i] + 1, 4);
-#pragma omp critical
-            {
-                printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
-            }
+// #pragma omp critical
+//             {
+//                 printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+//             }
             free(result);
         }
         double end_time = omp_get_wtime();

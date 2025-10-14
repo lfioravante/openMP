@@ -319,16 +319,16 @@ int main(int argc, char *argv[])
             results[1] = svm_compute(samples[i], 2, set_virg_svs, set_virg_alphas, set_virg_bias);
             results[2] = svm_compute(samples[i], 16, versi_virg_svs, versi_virg_alphas, versi_virg_bias);
             results[3] = samples[i][2]; //id
-#if PARALLEL
-#pragma omp critical
-#endif
-            {
-                printf("%3d: ", i);
-                printf("%5f, ", results[0]);
-                printf("%5f, ", results[1]);
-                printf("%5f\n", results[2]);
-                printf("Final class -> %d\n", classify(results));
-            }
+// #if PARALLEL
+// #pragma omp critical
+// #endif
+//             {
+//                 printf("%3d: ", i);
+//                 printf("%5f, ", results[0]);
+//                 printf("%5f, ", results[1]);
+//                 printf("%5f\n", results[2]);
+//                 printf("Final class -> %d\n", classify(results));
+//             }
         }
         double rep_total_time = omp_get_wtime() - start_time;
         double rep_avg_time = rep_total_time / num_samples;
