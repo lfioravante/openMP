@@ -102,7 +102,7 @@ int classify(double *results, int size_results)
     double final_score = *results;
     int i;
 #if PARALLEL
-#pragma omp simd reduction(max : final_score, final_class) if (PARALLEL)
+#pragma omp simd reduction(max : final_score, final_class)
 #endif
     for (i = 1; i < size_results; i++)
     {
@@ -122,18 +122,14 @@ int classify(double *results, int size_results)
 int main(int argc, char *argv[])
 {
     // Valores padrão
-    int threads = 4;
+    int threads = 1;
     int num_reps = 100;
 
     // Ler argumentos da linha de comando
     if (argc >= 2)
-    {
-        threads = atoi(argv[1]);
-    }
+        num_reps = atoi(argv[1]);
     if (argc >= 3)
-    {
-        num_reps = atoi(argv[2]);
-    }
+        threads = atoi(argv[2]);
 
     //
     int i;
@@ -332,7 +328,7 @@ int main(int argc, char *argv[])
         {147, 6.5, 3.0, 5.2, 2.0, 2.0},
         {148, 6.2, 3.4, 5.4, 2.3, 2.0},
         {149, 5.9, 3.0, 5.1, 1.8, 2.0}};
-    
+
     int batch_size = 50;
 
 #if PARALLEL
@@ -347,14 +343,27 @@ int main(int argc, char *argv[])
         double *result;
         (void)result;
 #if PARALLEL
-        #pragma omp parallel for if (PARALLEL) schedule(dynamic) reduction(+ : correct_predictions) private(result)
+#pragma omp parallel for schedule(dynamic) reduction(+ : correct_predictions) private(result)
 #endif
+        #pragma omp parallel for
+        for (int b = 0; b < 150; b += batch_size)
+        {
+            for (i = b; i < b + batch_size && i < 150; i++)
+            {
+                result = neural_net_run(neural_net, test_data[i] + 1, 4);
+
+                //printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+
+                free(result);
+            }
+        }
         for (i = 0; i < 150; i++)
         {
             result = neural_net_run(neural_net, test_data[i] + 1, 4);
-
-            //printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
-
+// #pragma omp critical
+//             {
+//                 printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+//             }
             free(result);
         }
         double end_time = omp_get_wtime();

@@ -14,18 +14,92 @@ O projeto está estruturado em duas partes principais, conforme descrito nas aul
 2.  **Parte 2: Algoritmos de Machine Learning:** Aplicação de diretivas OpenMP para paralelizar três algoritmos de ML (ANN, SVM e RF) e um modelo de CNN da biblioteca CMSIS-NN.
 
 ---
+## 🛠️ Ambiente de Execução
+
+Os códigos foram compilados e executados em diferentes ambientes:
+* **Parte 1:** WSL - i72630QM
+* **Parte 2:** Docker – QEMU ARM64 – Debian 12 - i72630QM
+
+---
 
 ## 🚀 Parte 1: Multiplicação de Matrizes
 
 ### Objetivo
 
-O principal objetivo desta etapa é se familiarizar com a programação paralela utilizando OpenMP e medir o ganho de desempenho da versão paralela em comparação com o código sequencial de referência. ]Os experimentos envolveram a variação do tamanho das matrizes e do número de threads para analisar o impacto no tempo de execução e no speedup.
+O principal objetivo desta etapa é se familiarizar com a programação paralela utilizando OpenMP e medir o ganho de desempenho da versão paralela em comparação com o código sequencial de referência. Os experimentos envolveram a variação do tamanho das matrizes e do número de threads para analisar o impacto no tempo de execução e no speedup.
 
 ### Implementações Desenvolvidas
 
-Foram criadas duas implementações principais em C:
+Foram criadas duas implementações principais em C para a multiplicação de matrizes:
 
-* **`matrix_generic.c`**: Uma implementação genérica que permite a multiplicação de matrizes de qualquer dimensão, com o número de threads sendo configurável em tempo de execução.
+* **Matriz de Tamanho Fixo:** Uma implementação com matrizes de dimensão 4x4.
+* **Matriz de Tamanho Variável (`matrix_generic.c`):** Uma implementação mais genérica que permite a multiplicação de matrizes de qualquer dimensão (`N x N`), alocadas dinamicamente. O número de threads também é configurável em tempo de execução.
+
+Para garantir a corretude da multiplicação na versão de matriz variável, a Matriz B foi preenchida como uma matriz identidade, permitindo a verificação do resultado final com a Matriz A, já que `A x I = A`.
+
+### Estratégia de Paralelização
+
+A paralelização foi focada no loop de cálculo da multiplicação das matrizes.
+* Foi utilizada a diretiva `#pragma omp parallel for collapse(2)` para paralelizar os dois loops externos aninhados (iterações de `i` e `j`), distribuindo o cálculo da matriz resultante entre as threads.
+* O número de threads para a execução paralela é definido através de um argumento na linha de comando, utilizando a função `omp_set_num_threads(uThreads)`.
+* Todos os códigos, incluindo a versão sequencial, foram compilados com a flag do OpenMP para permitir o uso da função `omp_get_wtime()` para uma medição precisa do tempo de execução.
+
+### Compilação e Execução
+
+1.  Navegue até a pasta `part1`:
+    ```bash
+    cd part1
+    ```
+2.  Compile todos os códigos com o comando:
+    ```bash
+    make all
+    ```
+3.  Execute os códigos conforme os exemplos abaixo:
+
+    * **Matriz Fixa (Sequencial):**
+        ```bash
+        ./matrix_fixed_seq [Num_Repetições]
+        ```
+    * **Matriz Fixa (Paralelo):**
+        ```bash
+        ./matrix_fixed_par [Num_Repetições] [Num_Threads]
+        ```
+    * **Matriz Variável (Sequencial):**
+        ```bash
+        ./matrix_multiply_seq [Num_Repetições] [Tamanho_Matriz]
+        ```
+    * **Matriz Variável (Paralelo):**
+        ```bash
+        ./matrix_multiply_par [Num_Repetições] [Tamanho_Matriz] [Num_Threads]
+        ```
+
+### Análise de Resultados
+
+#### Matriz Fixa (4x4)
+Para matrizes de dimensão pequena, o overhead (custo de criação e gerenciamento das threads) da paralelização foi maior que o ganho de desempenho. Como resultado, a execução sequencial se mostrou mais eficiente.
+
+* **Output Sequencial (1000 repetições):**
+    * **Tempo médio:** 0.000149 ms
+ 
+<img width="886" height="476" alt="image" src="https://github.com/user-attachments/assets/6a67cb80-3094-49a4-b24b-8687508f86a0" />
+
+* **Output Paralelo (1000 repetições, 4 Threads):**
+    * **Tempo médio:** 0.002549 ms
+
+<img width="886" height="458" alt="image" src="https://github.com/user-attachments/assets/705395b9-f133-42fb-8197-d2091a97dcf3" />
+
+#### Matriz Variável (Ex.:500x500)
+Com o aumento da carga de trabalho (matrizes 500x500), os benefícios da paralelização tornaram-se evidentes, com uma melhora significativa no tempo de execução. A verificação do resultado (`A x I = A`) confirmou que a lógica paralela estava correta.
+
+* **Output Sequencial (10 repetições):**
+    * **Tempo médio:** 464.091446 ms
+      
+<img width="886" height="275" alt="image" src="https://github.com/user-attachments/assets/ee201b1f-eb82-4c01-8a59-4d640cb47ef5" />
+
+* **Output Paralelo (10 repetições, 4 Threads):**
+    * **Tempo médio:** 281.253110 ms
+
+<img width="886" height="252" alt="image" src="https://github.com/user-attachments/assets/5ae26b42-ab7d-41a7-9fc7-01ae62775577" />
 
 ---
 

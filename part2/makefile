@@ -49,7 +49,7 @@ all_seq: $(TARGET_NN_SEQ) $(TARGET_RF_SEQ) $(TARGET_SVM_SEQ)
 
 all_par: $(TARGET_NN_PAR) $(TARGET_RF_PAR) $(TARGET_SVM_PAR)
 
-all_both: all_seq all_par
+all: all_seq all_par
 
 
 # --- Run Rules ---
