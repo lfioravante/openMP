@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <omp.h>
 
-
 #ifndef PARALLEL
 #define PARALLEL 0 // Default to sequencial mode
 #endif
@@ -55,49 +54,59 @@ int main(int argc, char *argv[])
 {
     // Ler argumentos da linha de comando
     if (argc >= 2)
-        uThreads = atoi(argv[1]);
+	    uReps = atoi(argv[1]);
     if (argc >= 3)
-        uReps = atoi(argv[2]);
-
-    // creates variables for timing
-    double start_time, end_time;
-    double elapsed_time;
-
-    // Initialize result matrix to zeros
-    for (int i = 0; i < ROWS; i++)
-    {
-        for (int j = 0; j < COLUMNS; j++)
-            MATRIX_C[i][j] = 0;
-    }
+		uThreads = atoi(argv[2]);
+#if PARALLEL
+    // Set number of threads
+    omp_set_num_threads(uThreads);
+#endif
 
     // Fill matrix A and matrix B using the above function
     Fill_Matrix(MATRIX_A);
     Fill_Matrix(MATRIX_B);
 
-    // start timer
-    start_time = omp_get_wtime();
+    double dTotalTime = 0.0;
+    double dMinTime = 99999999; // Initialize with a very large value
+    double dMaxTime = 0.0;
+    double dAverageTime = 0.0;
+    double start_time, end_time, current_time;
 
-    // multiplication of the 2 input matrices
+    // Multiple executions for average calculation
+    for (int rep = 0; rep < uReps; rep++)
+    {
+        // Initialize result matrix to zeros
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLUMNS; j++)
+                MATRIX_C[i][j] = 0;
+        }
+
+        start_time = omp_get_wtime();
+        // multiplication of the 2 input matrices
 #if PARALLEL
 #pragma omp parallel for collapse(2)
 #endif
-    for (int i = 0; i < ROWS; i++)
-    {
-        for (int j = 0; j < COLUMNS; j++)
+        for (int i = 0; i < ROWS; i++)
         {
-            for (int k = 0; k < COLUMNS; k++)
-                MATRIX_C[i][j] += MATRIX_A[i][k] * MATRIX_B[k][j];
+            for (int j = 0; j < COLUMNS; j++)
+            {
+                for (int k = 0; k < COLUMNS; k++)
+                    MATRIX_C[i][j] += MATRIX_A[i][k] * MATRIX_B[k][j];
+            }
         }
+        end_time = omp_get_wtime();
+
+        current_time = (end_time - start_time) * 1000.0;
+
+        dTotalTime += current_time;
+        if (current_time < dMinTime) dMinTime = current_time;
+        if (current_time > dMaxTime) dMaxTime = current_time;
     }
 
-    // stop timer
-    end_time = omp_get_wtime();
+    // Calculate average time
+    dAverageTime = dTotalTime / uReps;
 
-    // Compute the elapsed time in milliseconds
-    elapsed_time = (end_time - start_time) * 1000.0;
-
-    // print statements to print each matrix, the resultant
-    // matrix and the elapsed time of the program.
     printf("Matrix A is: \n");
     printMatrix(MATRIX_A);
     printf("Matrix B is: \n");
@@ -105,6 +114,12 @@ int main(int argc, char *argv[])
     printf("Resultant Matrix C, where Matrix A X Matrix B is: \n");
     printMatrix(MATRIX_C);
 
-    printf("The elapsed time is %f ms \n", elapsed_time);
+    printf("\n=== STATISTICS ===\n");
+    printf("Average time: %f ms\n", dAverageTime);
+    printf("Minimum time: %f ms\n", dMinTime);
+    printf("Maximum time: %f ms\n", dMaxTime);
+    printf("Variation: ±%f ms\n", (dMaxTime - dMinTime) / 2);
+    printf("Speedup (min/max): %.2fx\n", dMaxTime / dMinTime);
+    
     return 0;
 }
