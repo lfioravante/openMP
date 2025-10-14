@@ -38,14 +38,14 @@ $(TARGET_RF_PAR): $(RF_DIR)/main.c
 
 # --- SVM Build Rules ---
 
-$(TARGET_SVN_SEQ): $(SVM_DIR)/main.c
+$(TARGET_SVM_SEQ): $(SVM_DIR)/main.c
 	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=0 -o $@ $< $(LDLIBS)
 
 $(TARGET_SVM_PAR): $(SVM_DIR)/main.c
 	$(CC) $(CFLAGS) $(OMP_FLAG) -DPARALLEL=1 -o $@ $< $(LDLIBS)
 
 
-all_seq: $(TARGET_NN_SEQ) $(TARGET_RF_SEQ) $(TARGET_SVN_SEQ)
+all_seq: $(TARGET_NN_SEQ) $(TARGET_RF_SEQ) $(TARGET_SVM_SEQ)
 
 all_par: $(TARGET_NN_PAR) $(TARGET_RF_PAR) $(TARGET_SVM_PAR)
 
@@ -72,14 +72,14 @@ run_svm:
 ifeq ($(PARALLEL),1)
 	@$(MAKE) $(TARGET_SVM_PAR)
 else
-	@$(MAKE) $(TARGET_SVN_SEQ)
+	@$(MAKE) $(TARGET_SVM_SEQ)
 endif
 
 
 # --- Maintenance ---
 
 clean:
-	rm -f $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVN_SEQ) $(TARGET_SVM_PAR) *.o
+	rm -f $(TARGET_NN_SEQ) $(TARGET_NN_PAR) $(TARGET_RF_SEQ) $(TARGET_RF_PAR) $(TARGET_SVM_SEQ) $(TARGET_SVM_PAR) *.o
 
 help:
 	@echo "Available targets:"
