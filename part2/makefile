@@ -14,7 +14,7 @@ TARGET_NN_SEQ = nn_seq
 TARGET_NN_PAR = nn_par
 TARGET_RF_SEQ = rf_seq
 TARGET_RF_PAR = rf_par
-TARGET_SVN_SEQ = svN_seq
+TARGET_SVM_SEQ = svm_seq
 TARGET_SVM_PAR = svm_par
 
 # Default parameters
@@ -49,7 +49,7 @@ all_seq: $(TARGET_NN_SEQ) $(TARGET_RF_SEQ) $(TARGET_SVN_SEQ)
 
 all_par: $(TARGET_NN_PAR) $(TARGET_RF_PAR) $(TARGET_SVM_PAR)
 
-all_both: all_seq all_par
+all: all_seq all_par
 
 
 # --- Run Rules ---

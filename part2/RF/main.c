@@ -343,18 +343,18 @@ float test_data[150][6] = {
  * @brief  The application entry point.
  * @retval int
  */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // Valores padrão
-    int threads = 4;
+    int threads = 1;
     int num_reps = 100;
-    
+
     // Ler argumentos da linha de comando
-    if (argc >= 2) {
-        threads = atoi(argv[1]);
-    }
-    if (argc >= 3) {
-        num_reps = atoi(argv[2]);
-    }
+    if (argc >= 2)
+        num_reps = atoi(argv[1]);
+    if (argc >= 3)
+        threads = atoi(argv[2]);
+
     // dimensions of csv file
     int n_estimators = 10; // n_estimators = number of trees in the foreset
     // int rowsTree = 8-1;
