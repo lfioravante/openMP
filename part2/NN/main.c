@@ -345,25 +345,26 @@ int main(int argc, char *argv[])
 #if PARALLEL
 #pragma omp parallel for schedule(dynamic) reduction(+ : correct_predictions) private(result)
 #endif
-        #pragma omp parallel for
         for (int b = 0; b < 150; b += batch_size)
         {
             for (i = b; i < b + batch_size && i < 150; i++)
             {
                 result = neural_net_run(neural_net, test_data[i] + 1, 4);
 
-                //printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
-
+                // #pragma omp critical
+                //{
+                    // printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+                //}
                 free(result);
             }
         }
         for (i = 0; i < 150; i++)
         {
             result = neural_net_run(neural_net, test_data[i] + 1, 4);
-// #pragma omp critical
-//             {
-//                 printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
-//             }
+            // #pragma omp critical
+            //             {
+            //                 printf("%lf %lf %lf -> %d\n", *result, result[1], result[2], classify(result, 3));
+            //             }
             free(result);
         }
         double end_time = omp_get_wtime();

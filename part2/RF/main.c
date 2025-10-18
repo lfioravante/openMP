@@ -368,7 +368,6 @@ int main(int argc, char *argv[])
     int i;
 #if PARALLEL
     omp_set_num_threads(threads);
-    omp_set_dynamic(0);
 #endif
 
     double total_prediction_time = 0.0;
@@ -413,8 +412,8 @@ int main(int argc, char *argv[])
 
         double prediction_start = omp_get_wtime();
 
-#if (PARALLEL != 0)
-#pragma omp parallel for private(sample) schedule(dynamic, 1000000)
+#if PARALLEL
+#pragma omp parallel for private(sample) schedule(dynamic)
 #endif
         for (int j = 0; j < 75; j++)
         {
@@ -430,8 +429,8 @@ int main(int argc, char *argv[])
 //                 }
 
 //                 printf(" -> ");
-//             }
-#if (PARALLEL != 0)
+//            }
+#if PARALLEL
 #pragma omp parallel for
 #endif
             for (i = 0; i < n_estimators; i++)

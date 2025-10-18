@@ -297,7 +297,6 @@ int main(int argc, char *argv[])
     (void)results;
     unsigned num_samples = 150;
 #if PARALLEL
-    // Configuração do número de threads
     omp_set_num_threads(threads);
 #endif
 
@@ -310,7 +309,6 @@ int main(int argc, char *argv[])
     {
         double start_time = omp_get_wtime();
 #if PARALLEL
-// Paralelização do loop principal com agendamento estático
 #pragma omp parallel for
 #endif
         for (int i = 0; i < num_samples; i++)
